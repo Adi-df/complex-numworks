@@ -134,7 +134,7 @@ pub mod backlight {
     #[must_use]
     pub fn brightness() -> u8 {
         unsafe {
-            return eadk_backlight_brightness();
+            eadk_backlight_brightness()
         }
     }
 
@@ -225,7 +225,7 @@ pub mod timing {
     #[must_use]
     pub fn millis() -> u64 {
         unsafe {
-            return eadk_timing_millis();
+            eadk_timing_millis()
         }
     }
 
@@ -237,7 +237,7 @@ pub mod timing {
 }
 
 pub fn random() -> u32 {
-    unsafe { return eadk_random() }
+    unsafe { eadk_random() }
 }
 
 extern "C" {
