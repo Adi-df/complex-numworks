@@ -16,7 +16,7 @@ mod complex;
 use complex::Complex;
 
 mod function;
-use function::{Evaluate, Function, StringFunction};
+use function::{Evaluate, FastFunction, Function, MathInstruction, StringFunction};
 
 #[export_name = "eadk_app_name"]
 #[link_section = ".rodata.eadk_app_name"]
@@ -87,8 +87,8 @@ struct ComplexRect {
     to_imag: f64,
 }
 
-struct State<'a> {
-    func: &'a dyn Evaluate,
+struct State {
+    func: FastFunction,
     area: ComplexRect,
     color_mode: fn(Complex) -> Color,
     mode: StateMode,
@@ -102,8 +102,7 @@ enum StateMode {
 
 #[no_mangle]
 fn _eadk_main() {
-    let mut func_body = Function::default();
-    let func = |z: Complex| z;
+    let mut func_body = Function::from_slice(&[MathInstruction::Z]);
 
     let color_modes = [
         log2_complex_to_color,
@@ -112,7 +111,7 @@ fn _eadk_main() {
     ];
 
     let mut state = State {
-        func: &func,
+        func: FastFunction::from(func_body.clone()),
         area: ComplexRect {
             from_real: -10.,
             to_real: 10.,
@@ -292,6 +291,15 @@ fn _eadk_main() {
                 timing::msleep(50);
             }
             StateMode::FunctionEditor => {
+                display::push_rect_uniform(
+                    Rect {
+                        x: 0,
+                        y: 0,
+                        width: SCREEN_WIDTH,
+                        height: SCREEN_HEIGHT,
+                    },
+                    Color::WHITE,
+                );
                 display::draw_string(
                     StringFunction::from(func_body.clone()).as_str(),
                     Point::new(0, 10),
@@ -299,6 +307,21 @@ fn _eadk_main() {
                     Color::BLACK,
                     Color::WHITE,
                 );
+
+                if keyboard_state.key_down(key::BACKSPACE) {
+                    func_body.pop();
+                } else if keyboard_state.key_down(key::BACK) {
+                    state.mode = StateMode::Default;
+                    plot_func(&state);
+                } else if keyboard_state.key_down(key::OK) {
+                    state.func = FastFunction::from(func_body.clone());
+                    state.mode = StateMode::Default;
+
+                    plot_func(&state);
+                }
+
+                timing::msleep(100);
+                display::wait_for_vblank();
             }
         }
     }
