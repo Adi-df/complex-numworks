@@ -106,7 +106,6 @@ fn _eadk_main() {
         MathInstruction::Number(2.),
         MathInstruction::Pow,
     ]);
-    let func = FastFunction::from(func_body.clone());
 
     let color_modes = [
         log2_complex_to_color,
@@ -115,7 +114,7 @@ fn _eadk_main() {
     ];
 
     let mut state = State {
-        func,
+        func: FastFunction::from(func_body.clone()),
         area: ComplexRect {
             from_real: -10.,
             to_real: 10.,
