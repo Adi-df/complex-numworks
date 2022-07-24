@@ -15,18 +15,21 @@ impl Color {
     pub const WHITE: Self = Self::from_rgb888(255, 255, 255);
     pub const BLACK: Self = Self::from_rgb888(0, 0, 0);
 
+    #[must_use]
     pub const fn new(rgb565: u16) -> Self {
         Self { rgb565 }
     }
 
+    #[must_use]
     pub const fn from_rgb888(r: u8, g: u8, b: u8) -> Self {
         Self {
-            rgb565: ((r as u16 & 0b11111000) << 8)
-                | ((g as u16 & 0b11111100) << 3)
+            rgb565: ((r as u16 & 0b1111_1000) << 8)
+                | ((g as u16 & 0b1111_1100) << 3)
                 | (b as u16 >> 3),
         }
     }
 
+    #[must_use]
     pub fn from_hsv(hue: f64, saturation: f64, value: f64) -> Self {
         let rgb = Rgb::from_color_unclamped(Hsv::new(RgbHue::from_radians(hue), saturation, value));
 
@@ -53,6 +56,7 @@ pub struct Point {
 }
 
 impl Point {
+    #[must_use]
     pub fn new(x: u16, y: u16) -> Self {
         Self { x, y }
     }
@@ -62,10 +66,12 @@ impl Point {
 pub struct State(u64);
 
 impl State {
+    #[must_use]
     pub fn new(state: u64) -> Self {
         Self(state)
     }
 
+    #[must_use]
     pub fn key_down(&self, k: u32) -> bool {
         self.0.wrapping_shr(k) & 1 != 0
     }
@@ -125,10 +131,10 @@ pub mod backlight {
             eadk_backlight_set_brightness(brightness);
         }
     }
+
+    #[must_use]
     pub fn brightness() -> u8 {
-        unsafe {
-            return eadk_backlight_brightness();
-        }
+        unsafe { eadk_backlight_brightness() }
     }
 
     extern "C" {
@@ -192,6 +198,7 @@ pub mod display {
 pub mod keyboard {
     use super::State;
 
+    #[must_use]
     pub fn scan() -> State {
         unsafe { State::new(eadk_keyboard_scan()) }
     }
@@ -214,10 +221,9 @@ pub mod timing {
         }
     }
 
+    #[must_use]
     pub fn millis() -> u64 {
-        unsafe {
-            return eadk_timing_millis();
-        }
+        unsafe { eadk_timing_millis() }
     }
 
     extern "C" {
@@ -227,8 +233,9 @@ pub mod timing {
     }
 }
 
+#[must_use]
 pub fn random() -> u32 {
-    unsafe { return eadk_random() }
+    unsafe { eadk_random() }
 }
 
 extern "C" {

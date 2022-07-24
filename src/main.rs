@@ -16,9 +16,8 @@ mod complex;
 use complex::Complex;
 
 mod function;
-use function::{Evaluate, Function, StringFunction};
+use function::{Evaluate, FastFunction, Function, MathInstruction, StringFunction};
 
-#[export_name = "eadk_app_name"]
 #[link_section = ".rodata.eadk_app_name"]
 pub static EADK_APP_NAME: [u8; 10] = *b"HelloRust\0";
 
@@ -87,8 +86,8 @@ struct ComplexRect {
     to_imag: f64,
 }
 
-struct State<'a> {
-    func: &'a dyn Evaluate,
+struct State {
+    func: FastFunction,
     area: ComplexRect,
     color_mode: fn(Complex) -> Color,
     mode: StateMode,
@@ -97,12 +96,17 @@ struct State<'a> {
 enum StateMode {
     Default,
     ValueExplorer { x: u16, y: u16 },
-    FunctionEditor { instructions: Function },
+    FunctionEditor,
 }
 
 #[no_mangle]
 fn _eadk_main() {
-    let func = |z: Complex| z;
+    let mut func_body = Function::from_slice(&[
+        MathInstruction::Z,
+        MathInstruction::Number(2.),
+        MathInstruction::Pow,
+    ]);
+    let func = FastFunction::from(func_body.clone());
 
     let color_modes = [
         log2_complex_to_color,
@@ -111,7 +115,7 @@ fn _eadk_main() {
     ];
 
     let mut state = State {
-        func: &func,
+        func,
         area: ComplexRect {
             from_real: -10.,
             to_real: 10.,
@@ -202,9 +206,7 @@ fn _eadk_main() {
                         y: SCREEN_HEIGHT / 2,
                     }
                 } else if keyboard_state.key_down(key::TOOLBOX) {
-                    state.mode = StateMode::FunctionEditor {
-                        instructions: Function::new(),
-                    }
+                    state.mode = StateMode::FunctionEditor;
                 }
             }
             StateMode::ValueExplorer { x, y } => {
@@ -292,14 +294,38 @@ fn _eadk_main() {
                 display::wait_for_vblank();
                 timing::msleep(50);
             }
-            StateMode::FunctionEditor { ref instructions } => {
+            StateMode::FunctionEditor => {
+                display::push_rect_uniform(
+                    Rect {
+                        x: 0,
+                        y: 0,
+                        width: SCREEN_WIDTH,
+                        height: SCREEN_HEIGHT,
+                    },
+                    Color::WHITE,
+                );
                 display::draw_string(
-                    <&Function as Into<StringFunction>>::into(instructions).as_str(),
+                    StringFunction::from(func_body.clone()).as_str(),
                     Point::new(0, 10),
                     false,
                     Color::BLACK,
                     Color::WHITE,
                 );
+
+                if keyboard_state.key_down(key::BACKSPACE) {
+                    func_body.pop();
+                } else if keyboard_state.key_down(key::BACK) {
+                    state.mode = StateMode::Default;
+                    plot_func(&state);
+                } else if keyboard_state.key_down(key::OK) {
+                    state.func = FastFunction::from(func_body.clone());
+                    state.mode = StateMode::Default;
+
+                    plot_func(&state);
+                }
+
+                timing::msleep(100);
+                display::wait_for_vblank();
             }
         }
     }
