@@ -294,7 +294,7 @@ fn _eadk_main() {
             }
             StateMode::FunctionEditor { ref instructions } => {
                 display::draw_string(
-                    &StringFunction::from(instructions.clone()).as_str(),
+                    StringFunction::from(instructions.clone()).as_str(),
                     Point::new(0, 10),
                     false,
                     Color::BLACK,
