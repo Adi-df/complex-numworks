@@ -203,7 +203,7 @@ fn _eadk_main() {
                     }
                 } else if keyboard_state.key_down(key::TOOLBOX) {
                     state.mode = StateMode::FunctionEditor {
-                        instructions: Function::new(),
+                        instructions: Function::default(),
                     }
                 }
             }
@@ -294,7 +294,7 @@ fn _eadk_main() {
             }
             StateMode::FunctionEditor { ref instructions } => {
                 display::draw_string(
-                    <&Function as Into<StringFunction>>::into(instructions).as_str(),
+                    &StringFunction::from(instructions.clone()).as_str(),
                     Point::new(0, 10),
                     false,
                     Color::BLACK,
