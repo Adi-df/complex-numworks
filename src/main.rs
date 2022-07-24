@@ -18,6 +18,7 @@ use complex::Complex;
 mod function;
 use function::{Evaluate, FastFunction, Function, MathInstruction, StringFunction};
 
+#[export_name = "eadk_app_name"]
 #[link_section = ".rodata.eadk_app_name"]
 pub static EADK_APP_NAME: [u8; 10] = *b"HelloRust\0";
 
