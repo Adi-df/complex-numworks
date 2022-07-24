@@ -102,7 +102,11 @@ enum StateMode {
 
 #[no_mangle]
 fn _eadk_main() {
-    let mut func_body = Function::from_slice(&[MathInstruction::Z]);
+    let mut func_body = Function::from_slice(&[
+        MathInstruction::Z,
+        MathInstruction::Number(2.),
+        MathInstruction::Pow,
+    ]);
 
     let color_modes = [
         log2_complex_to_color,
