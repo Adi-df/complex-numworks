@@ -56,6 +56,7 @@ pub struct Point {
 }
 
 impl Point {
+    #[must_use]
     pub fn new(x: u16, y: u16) -> Self {
         Self { x, y }
     }
@@ -134,7 +135,7 @@ pub mod backlight {
     #[must_use]
     pub fn brightness() -> u8 {
         unsafe {
-            eadk_backlight_brightness()
+            return eadk_backlight_brightness();
         }
     }
 
@@ -225,7 +226,7 @@ pub mod timing {
     #[must_use]
     pub fn millis() -> u64 {
         unsafe {
-            eadk_timing_millis()
+            return eadk_timing_millis();
         }
     }
 
@@ -236,8 +237,9 @@ pub mod timing {
     }
 }
 
+#[must_use]
 pub fn random() -> u32 {
-    unsafe { eadk_random() }
+    unsafe { return eadk_random() }
 }
 
 extern "C" {
