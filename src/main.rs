@@ -97,11 +97,12 @@ struct State<'a> {
 enum StateMode {
     Default,
     ValueExplorer { x: u16, y: u16 },
-    FunctionEditor { instructions: Function },
+    FunctionEditor,
 }
 
 #[no_mangle]
 fn _eadk_main() {
+    let mut func_body = Function::default();
     let func = |z: Complex| z;
 
     let color_modes = [
@@ -202,9 +203,7 @@ fn _eadk_main() {
                         y: SCREEN_HEIGHT / 2,
                     }
                 } else if keyboard_state.key_down(key::TOOLBOX) {
-                    state.mode = StateMode::FunctionEditor {
-                        instructions: Function::default(),
-                    }
+                    state.mode = StateMode::FunctionEditor;
                 }
             }
             StateMode::ValueExplorer { x, y } => {
@@ -292,9 +291,9 @@ fn _eadk_main() {
                 display::wait_for_vblank();
                 timing::msleep(50);
             }
-            StateMode::FunctionEditor { ref instructions } => {
+            StateMode::FunctionEditor => {
                 display::draw_string(
-                    StringFunction::from(instructions.clone()).as_str(),
+                    StringFunction::from(func_body.clone()).as_str(),
                     Point::new(0, 10),
                     false,
                     Color::BLACK,
