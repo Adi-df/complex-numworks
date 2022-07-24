@@ -314,6 +314,25 @@ fn _eadk_main() {
 
                 if keyboard_state.key_down(key::BACKSPACE) {
                     func_body.pop();
+                } else if keyboard_state.key_down(key::IMAGINARY) {
+                    func_body.push(MathInstruction::Imag).unwrap();
+                } else if keyboard_state.key_down(key::PLUS) {
+                    func_body.push(MathInstruction::Add).unwrap();
+                } else if keyboard_state.key_down(key::MINUS) {
+                    func_body.push(MathInstruction::Sub).unwrap();
+                } else if keyboard_state.key_down(key::MULTIPLICATION) {
+                    func_body.push(MathInstruction::Mul).unwrap();
+                } else if keyboard_state.key_down(key::DIVISION) {
+                    func_body.push(MathInstruction::Div).unwrap();
+                } else if keyboard_state.key_down(key::POWER) {
+                    func_body.push(MathInstruction::Pow).unwrap();
+                } else if keyboard_state.key_down(key::EXP) {
+                    func_body.push(MathInstruction::Exp).unwrap();
+                } else if keyboard_state.key_down(key::LN) {
+                    func_body.push(MathInstruction::Log).unwrap();
+                } else if keyboard_state.key_down(key::SQUARE) {
+                    func_body.push(MathInstruction::Number(2.)).unwrap();
+                    func_body.push(MathInstruction::Pow).unwrap();
                 } else if keyboard_state.key_down(key::BACK) {
                     state.mode = StateMode::Default;
                     plot_func(&state);
