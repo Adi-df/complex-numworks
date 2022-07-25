@@ -53,27 +53,28 @@ fn sigmoid_complex_to_color(z: Complex) -> Color {
 }
 
 fn plot_func(state: &State) {
-    (0..eadk::display::SCREEN_WIDTH).for_each(|x| {
-        let real = (x as f64 / SCREEN_WIDTH as f64) * (state.area.to_real - state.area.from_real)
-            + state.area.from_real;
-        (0..eadk::display::SCREEN_HEIGHT)
-            .map(move |y| Complex {
-                real,
-                imag: (1. - y as f64 / SCREEN_HEIGHT as f64)
-                    * (state.area.to_imag - state.area.from_imag)
-                    + state.area.from_imag,
+    (0..SCREEN_HEIGHT).for_each(|y| {
+        let imag = (1. - y as f64 / SCREEN_HEIGHT as f64)
+            * (state.area.to_imag - state.area.from_imag)
+            + state.area.from_imag;
+        (0..SCREEN_WIDTH)
+            .map(move |x| Complex {
+                real: (x as f64 / SCREEN_WIDTH as f64)
+                    * (state.area.to_real - state.area.from_real)
+                    + state.area.from_real,
+                imag,
             })
             .map(|z| state.func.eval(z))
             .enumerate()
-            .for_each(|(y, z)| {
-                display::push_rect_uniform(
+            .for_each(|(x, z)| {
+                display::push_rect(
                     Rect {
-                        x,
+                        x: x as u16,
                         y: y as u16,
                         width: 1,
                         height: 1,
                     },
-                    (state.color_mode)(z),
+                    &[(state.color_mode)(z)],
                 );
             });
     });

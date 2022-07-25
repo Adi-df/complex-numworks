@@ -219,11 +219,11 @@ impl Evaluate for FastFunction {
 
                 FastMathInstr::Exp => {
                     let c = stack.pop().unwrap();
-                    stack.push(c.exp()).unwrap();
+                    stack.push(c.exp());
                 }
                 FastMathInstr::Log => {
                     let c = stack.pop().unwrap();
-                    stack.push(c.log()).unwrap();
+                    stack.push(c.log());
                 }
 
                 FastMathInstr::ExpZ => stack.push(z.exp()).unwrap(),
@@ -231,70 +231,70 @@ impl Evaluate for FastFunction {
 
                 FastMathInstr::Add(z) => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs + *z).unwrap();
+                    stack.push(lhs + *z);
                 }
                 FastMathInstr::Sub(z) => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs - *z).unwrap();
+                    stack.push(lhs - *z);
                 }
                 FastMathInstr::Mul(z) => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs * *z).unwrap();
+                    stack.push(lhs * *z);
                 }
                 FastMathInstr::Div(z) => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs / *z).unwrap();
+                    stack.push(lhs / *z);
                 }
                 FastMathInstr::Pow(z) => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs.pow(*z)).unwrap();
+                    stack.push(lhs.pow(*z));
                 }
 
                 FastMathInstr::AddZ => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs + z).unwrap();
+                    stack.push(lhs + z);
                 }
                 FastMathInstr::SubZ => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs - z).unwrap();
+                    stack.push(lhs - z);
                 }
                 FastMathInstr::MulZ => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs * z).unwrap();
+                    stack.push(lhs * z);
                 }
                 FastMathInstr::DivZ => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs / z).unwrap();
+                    stack.push(lhs / z);
                 }
                 FastMathInstr::PowZ => {
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs.pow(z)).unwrap();
+                    stack.push(lhs.pow(z));
                 }
 
                 FastMathInstr::AddS => {
                     let rhs = stack.pop().unwrap();
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs + rhs).unwrap();
+                    stack.push(lhs + rhs);
                 }
                 FastMathInstr::SubS => {
                     let rhs = stack.pop().unwrap();
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs - rhs).unwrap();
+                    stack.push(lhs - rhs);
                 }
                 FastMathInstr::MulS => {
                     let rhs = stack.pop().unwrap();
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs * rhs).unwrap();
+                    stack.push(lhs * rhs);
                 }
                 FastMathInstr::DivS => {
                     let rhs = stack.pop().unwrap();
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs / rhs).unwrap();
+                    stack.push(lhs / rhs);
                 }
                 FastMathInstr::PowS => {
                     let rhs = stack.pop().unwrap();
                     let lhs = stack.pop().unwrap();
-                    stack.push(lhs.pow(rhs)).unwrap();
+                    stack.push(lhs.pow(rhs));
                 }
             }
         }
