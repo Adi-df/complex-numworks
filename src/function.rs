@@ -1,4 +1,5 @@
 use core::{
+    f64::consts::{E, PI},
     fmt::{Display, Write},
     iter::IntoIterator,
     ops::{Deref, DerefMut},
@@ -7,7 +8,7 @@ use core::{
 
 use heapless::{String, Vec};
 
-use crate::complex::{Complex, Exp, Log, Pow};
+use crate::complex::{Complex, Exp, Log, Pow, Trig};
 
 pub const FUNCTION_SIZE: usize = 255;
 pub const FUNCTION_STRING_SIZE: usize = FUNCTION_SIZE * 8;
@@ -26,14 +27,22 @@ pub type StringFunction = String<FUNCTION_STRING_SIZE>;
 pub enum MathInstruction {
     Z,
     Number(f64),
+
     Imag,
+    Pi,
+    E,
+
     Add,
     Sub,
     Mul,
     Div,
     Pow,
+
     Exp,
     Log,
+
+    Sin,
+    Cos,
 }
 
 #[derive(Clone, Debug)]
@@ -46,6 +55,12 @@ pub enum FastMathInstr {
     Mul(Complex),
     Div(Complex),
     Pow(Complex),
+
+    AddR(f64),
+    SubR(f64),
+    MulR(f64),
+    DivR(f64),
+    PowR(f64),
 
     AddZ,
     SubZ,
@@ -64,6 +79,12 @@ pub enum FastMathInstr {
 
     Exp,
     Log,
+
+    SinZ,
+    CosZ,
+
+    Sin,
+    Cos,
 }
 
 impl Display for MathInstruction {
@@ -71,7 +92,10 @@ impl Display for MathInstruction {
         match self {
             MathInstruction::Z => write!(f, "Z"),
             MathInstruction::Number(x) => write!(f, "{}", x),
+
             MathInstruction::Imag => write!(f, "i"),
+            MathInstruction::Pi => write!(f, "pi"),
+            MathInstruction::E => write!(f, "e"),
 
             MathInstruction::Add => write!(f, "+"),
             MathInstruction::Sub => write!(f, "-"),
@@ -79,8 +103,11 @@ impl Display for MathInstruction {
             MathInstruction::Div => write!(f, "/"),
             MathInstruction::Pow => write!(f, "^"),
 
-            MathInstruction::Exp => write!(f, "e"),
+            MathInstruction::Exp => write!(f, "e^"),
             MathInstruction::Log => write!(f, "ln"),
+
+            MathInstruction::Sin => write!(f, "sin"),
+            MathInstruction::Cos => write!(f, "cos"),
         }
     }
 }
@@ -162,10 +189,13 @@ impl Evaluate for Function {
             match instr {
                 MathInstruction::Z => stack.push(z).unwrap(),
                 MathInstruction::Number(x) => stack.push(Complex::from_real(*x)).unwrap(),
+
                 MathInstruction::Imag => {
                     let c = stack.pop().unwrap();
                     stack.push(c * Complex::from_imag(1.)).unwrap();
                 }
+                MathInstruction::Pi => stack.push(Complex::from_real(PI)).unwrap(),
+                MathInstruction::E => stack.push(Complex::from_real(E)).unwrap(),
 
                 MathInstruction::Add => {
                     let rhs = stack.pop().unwrap();
@@ -187,12 +217,12 @@ impl Evaluate for Function {
                     let lhs = stack.pop().unwrap();
                     stack.push(lhs / rhs).unwrap();
                 }
-
                 MathInstruction::Pow => {
                     let exponent = stack.pop().unwrap();
                     let c = stack.pop().unwrap();
                     stack.push(c.pow(exponent)).unwrap();
                 }
+
                 MathInstruction::Exp => {
                     let c = stack.pop().unwrap();
                     stack.push(c.exp()).unwrap();
@@ -200,6 +230,15 @@ impl Evaluate for Function {
                 MathInstruction::Log => {
                     let c = stack.pop().unwrap();
                     stack.push(c.log()).unwrap();
+                }
+
+                MathInstruction::Sin => {
+                    let c = stack.pop().unwrap();
+                    stack.push(c.sin()).unwrap();
+                }
+                MathInstruction::Cos => {
+                    let c = stack.pop().unwrap();
+                    stack.push(c.cos()).unwrap();
                 }
             }
         }
@@ -210,96 +249,124 @@ impl Evaluate for Function {
 
 impl Evaluate for FastFunction {
     fn eval(&self, z: Complex) -> Complex {
-        let mut stack: Vec<Complex, 32> = Vec::new();
+        let mut stack: [Complex; 32] = [Complex::ZERO; 32];
+        let mut stack_pointer = 0;
 
         for instr in self.iter() {
             match instr {
-                FastMathInstr::Z => stack.push(z).unwrap(),
-                FastMathInstr::Number(z) => stack.push(*z).unwrap(),
-
-                FastMathInstr::Exp => {
-                    let c = stack.pop().unwrap();
-                    stack.push(c.exp());
+                FastMathInstr::Z => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z;
                 }
-                FastMathInstr::Log => {
-                    let c = stack.pop().unwrap();
-                    stack.push(c.log());
+                FastMathInstr::Number(c) => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = *c;
                 }
 
-                FastMathInstr::ExpZ => stack.push(z.exp()).unwrap(),
-                FastMathInstr::LogZ => stack.push(z.log()).unwrap(),
+                FastMathInstr::Add(c) => {
+                    stack[stack_pointer] += *c;
+                }
+                FastMathInstr::Sub(c) => {
+                    stack[stack_pointer] -= *c;
+                }
+                FastMathInstr::Mul(c) => {
+                    stack[stack_pointer] *= *c;
+                }
+                FastMathInstr::Div(c) => {
+                    stack[stack_pointer] /= *c;
+                }
+                FastMathInstr::Pow(c) => {
+                    stack[stack_pointer] = stack[stack_pointer].pow(*c);
+                }
 
-                FastMathInstr::Add(z) => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs + *z);
+                FastMathInstr::AddR(r) => {
+                    stack[stack_pointer] += *r;
                 }
-                FastMathInstr::Sub(z) => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs - *z);
+                FastMathInstr::SubR(r) => {
+                    stack[stack_pointer] -= *r;
                 }
-                FastMathInstr::Mul(z) => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs * *z);
+                FastMathInstr::MulR(r) => {
+                    stack[stack_pointer] *= *r;
                 }
-                FastMathInstr::Div(z) => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs / *z);
+                FastMathInstr::DivR(r) => {
+                    stack[stack_pointer] /= *r;
                 }
-                FastMathInstr::Pow(z) => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs.pow(*z));
+                FastMathInstr::PowR(r) => {
+                    stack[stack_pointer] = stack[stack_pointer].pow(*r);
                 }
 
                 FastMathInstr::AddZ => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs + z);
+                    stack[stack_pointer] += z;
                 }
                 FastMathInstr::SubZ => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs - z);
+                    stack[stack_pointer] -= z;
                 }
                 FastMathInstr::MulZ => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs * z);
+                    stack[stack_pointer] *= z;
                 }
                 FastMathInstr::DivZ => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs / z);
+                    stack[stack_pointer] /= z;
                 }
                 FastMathInstr::PowZ => {
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs.pow(z));
+                    stack[stack_pointer] = stack[stack_pointer].pow(z);
                 }
 
                 FastMathInstr::AddS => {
-                    let rhs = stack.pop().unwrap();
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs + rhs);
+                    stack_pointer -= 1;
+                    stack[stack_pointer] += stack[stack_pointer + 1];
                 }
                 FastMathInstr::SubS => {
-                    let rhs = stack.pop().unwrap();
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs - rhs);
+                    stack_pointer -= 1;
+                    stack[stack_pointer] -= stack[stack_pointer + 1];
                 }
                 FastMathInstr::MulS => {
-                    let rhs = stack.pop().unwrap();
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs * rhs);
+                    stack_pointer -= 1;
+                    stack[stack_pointer] *= stack[stack_pointer + 1];
                 }
                 FastMathInstr::DivS => {
-                    let rhs = stack.pop().unwrap();
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs / rhs);
+                    stack_pointer -= 1;
+                    stack[stack_pointer] /= stack[stack_pointer + 1];
                 }
                 FastMathInstr::PowS => {
-                    let rhs = stack.pop().unwrap();
-                    let lhs = stack.pop().unwrap();
-                    stack.push(lhs.pow(rhs));
+                    stack_pointer -= 1;
+                    stack[stack_pointer] = stack[stack_pointer].pow(stack[stack_pointer + 1]);
+                }
+
+                FastMathInstr::Exp => {
+                    stack[stack_pointer] = stack[stack_pointer].exp();
+                }
+                FastMathInstr::Log => {
+                    stack[stack_pointer] = stack[stack_pointer].log();
+                }
+
+                FastMathInstr::ExpZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.exp();
+                }
+                FastMathInstr::LogZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.log();
+                }
+
+                FastMathInstr::Sin => {
+                    stack[stack_pointer] = stack[stack_pointer].sin();
+                }
+                FastMathInstr::Cos => {
+                    stack[stack_pointer] = stack[stack_pointer].cos();
+                }
+
+                FastMathInstr::SinZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.sin();
+                }
+                FastMathInstr::CosZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.cos();
                 }
             }
         }
 
-        stack.pop().unwrap()
+        stack[1]
     }
 }
 
@@ -327,6 +394,10 @@ impl From<Function> for FastFunction {
                             FastMathInstr::Number(Complex::from_real(x))
                         }
                     }
+
+                    MathInstruction::Pi => FastMathInstr::Number(Complex::from_real(PI)),
+                    MathInstruction::E => FastMathInstr::Number(Complex::from_real(E)),
+
                     MathInstruction::Imag => unreachable!(),
 
                     MathInstruction::Add => FastMathInstr::AddS,
@@ -337,6 +408,9 @@ impl From<Function> for FastFunction {
 
                     MathInstruction::Exp => FastMathInstr::Exp,
                     MathInstruction::Log => FastMathInstr::Log,
+
+                    MathInstruction::Sin => FastMathInstr::Sin,
+                    MathInstruction::Cos => FastMathInstr::Cos,
                 })
                 .unwrap();
             }
@@ -386,6 +460,15 @@ impl From<Function> for FastFunction {
                                     FastMathInstr::Log => {
                                         iter.next().unwrap();
                                         FastMathInstr::LogZ
+                                    }
+
+                                    FastMathInstr::Sin => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::SinZ
+                                    }
+                                    FastMathInstr::Cos => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::CosZ
                                     }
 
                                     _ => FastMathInstr::Z,
@@ -472,6 +555,15 @@ impl From<Function> for FastFunction {
                                         FastMathInstr::Number(c.log())
                                     }
 
+                                    FastMathInstr::Sin => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(c.sin())
+                                    }
+                                    FastMathInstr::Cos => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(c.cos())
+                                    }
+
                                     _ => FastMathInstr::Number(c),
                                 }
                             } else {
@@ -488,6 +580,28 @@ impl From<Function> for FastFunction {
             };
 
             fast_instr = pre_computed;
+        }
+
+        // Simplify real numbers
+        for instr in fast_instr.iter_mut() {
+            match instr {
+                FastMathInstr::Add(z) if z.is_real() => {
+                    *instr = FastMathInstr::AddR(z.real);
+                }
+                FastMathInstr::Sub(z) if z.is_real() => {
+                    *instr = FastMathInstr::SubR(z.real);
+                }
+                FastMathInstr::Mul(z) if z.is_real() => {
+                    *instr = FastMathInstr::MulR(z.real);
+                }
+                FastMathInstr::Div(z) if z.is_real() => {
+                    *instr = FastMathInstr::DivR(z.real);
+                }
+                FastMathInstr::Pow(z) if z.is_real() => {
+                    *instr = FastMathInstr::PowR(z.real);
+                }
+                _ => {}
+            }
         }
 
         fast_instr
