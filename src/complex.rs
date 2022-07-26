@@ -1,6 +1,6 @@
 use core::f64::consts::PI;
 use core::fmt::Display;
-use core::ops::{Add, Div, Mul, Neg, Sub};
+use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use libm::{atan2, cos, exp, sin};
 use libm::{log, sqrt};
@@ -18,6 +18,8 @@ impl Display for Complex {
 }
 
 impl Complex {
+    pub const ZERO: Complex = Complex { real: 0., imag: 0. };
+
     pub fn from_real(real: f64) -> Self {
         Complex { real, imag: 0. }
     }
@@ -44,6 +46,10 @@ impl Complex {
 
     pub fn polar(&self) -> (f64, f64) {
         (self.argument(), self.modulus())
+    }
+
+    pub fn is_real(&self) -> bool {
+        self.imag == 0.
     }
 }
 impl Neg for Complex {
@@ -92,6 +98,33 @@ impl Div<Complex> for Complex {
     }
 }
 
+impl AddAssign<Complex> for Complex {
+    fn add_assign(&mut self, rhs: Complex) {
+        self.real += rhs.real;
+        self.imag += rhs.imag;
+    }
+}
+impl SubAssign<Complex> for Complex {
+    fn sub_assign(&mut self, rhs: Complex) {
+        self.real -= rhs.real;
+        self.imag -= rhs.imag;
+    }
+}
+impl MulAssign<Complex> for Complex {
+    fn mul_assign(&mut self, rhs: Complex) {
+        self.real = self.real * rhs.real - self.imag * rhs.imag;
+        self.imag = self.real * rhs.imag + self.imag * rhs.real;
+    }
+}
+impl DivAssign<Complex> for Complex {
+    fn div_assign(&mut self, rhs: Complex) {
+        *self *= Complex {
+            real: rhs.real / (rhs.real * rhs.real + rhs.imag * rhs.imag),
+            imag: -rhs.imag / (rhs.real * rhs.real + rhs.imag * rhs.imag),
+        }
+    }
+}
+
 impl Add<f64> for Complex {
     type Output = Complex;
     fn add(self, rhs: f64) -> Complex {
@@ -129,6 +162,31 @@ impl Div<f64> for Complex {
     }
 }
 
+impl AddAssign<f64> for Complex {
+    fn add_assign(&mut self, rhs: f64) {
+        self.real += rhs;
+        self.imag += rhs;
+    }
+}
+impl SubAssign<f64> for Complex {
+    fn sub_assign(&mut self, rhs: f64) {
+        self.real -= rhs;
+        self.imag -= rhs;
+    }
+}
+impl MulAssign<f64> for Complex {
+    fn mul_assign(&mut self, rhs: f64) {
+        self.real *= rhs;
+        self.imag *= rhs;
+    }
+}
+impl DivAssign<f64> for Complex {
+    fn div_assign(&mut self, rhs: f64) {
+        self.real /= rhs;
+        self.imag /= rhs;
+    }
+}
+
 pub trait Pow<T> {
     type Output;
 
@@ -145,10 +203,25 @@ pub trait Log {
     fn log(self) -> Self::Output;
 }
 pub trait Trig {
-    type Output;
+    type Output: Div<Self::Output>;
 
     fn sin(self) -> Self::Output;
     fn cos(self) -> Self::Output;
+}
+
+impl Pow<f64> for Complex {
+    type Output = Complex;
+
+    fn pow(self, exp: f64) -> Complex {
+        (self.log() * exp).exp()
+    }
+}
+impl Pow<Complex> for Complex {
+    type Output = Complex;
+
+    fn pow(self, exp: Complex) -> Complex {
+        (self.log() * exp).exp()
+    }
 }
 
 impl Exp for Complex {
@@ -161,6 +234,12 @@ impl Exp for Complex {
         }
     }
 }
+impl Exp for f64 {
+    type Output = f64;
+    fn exp(self) -> f64 {
+        exp(self)
+    }
+}
 
 impl Log for Complex {
     type Output = Complex;
@@ -170,6 +249,12 @@ impl Log for Complex {
             real: log(self.modulus()),
             imag: self.argument(),
         }
+    }
+}
+impl Log for f64 {
+    type Output = f64;
+    fn log(self) -> f64 {
+        log(self)
     }
 }
 
@@ -189,18 +274,13 @@ impl Trig for Complex {
         }
     }
 }
+impl Trig for f64 {
+    type Output = f64;
 
-impl Pow<f64> for Complex {
-    type Output = Complex;
-
-    fn pow(self, exp: f64) -> Complex {
-        (self.log() * exp).exp()
+    fn sin(self) -> f64 {
+        sin(self)
     }
-}
-impl Pow<Complex> for Complex {
-    type Output = Complex;
-
-    fn pow(self, exp: Complex) -> Complex {
-        (self.log() * exp).exp()
+    fn cos(self) -> f64 {
+        cos(self)
     }
 }
