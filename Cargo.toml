@@ -13,11 +13,8 @@ bench = false
 doc = false
 crate-type = ["staticlib"]
 
-[profile.dev]
-opt-level = 3
-debug = 0
-strip = "none"
-lto = true
+[profile.release]
+lto = "fat"
 
 [dependencies]
 heapless = "0.7.15"
