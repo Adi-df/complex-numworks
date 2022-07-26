@@ -103,11 +103,7 @@ enum StateMode {
 
 #[no_mangle]
 fn _eadk_main() {
-    let mut func_body = Function::from_slice(&[
-        MathInstruction::Z,
-        MathInstruction::Number(2.),
-        MathInstruction::Pow,
-    ]);
+    let mut func_body = Function::from_slice(&[MathInstruction::Z]);
 
     let color_modes = [
         log2_complex_to_color,
@@ -301,13 +297,13 @@ fn _eadk_main() {
                         x: 0,
                         y: 0,
                         width: SCREEN_WIDTH,
-                        height: SCREEN_HEIGHT,
+                        height: 30,
                     },
                     Color::WHITE,
                 );
                 display::draw_string(
                     StringFunction::from(func_body.clone()).as_str(),
-                    Point::new(0, 10),
+                    Point::new(0, 0),
                     false,
                     Color::BLACK,
                     Color::WHITE,
@@ -315,8 +311,14 @@ fn _eadk_main() {
 
                 if keyboard_state.key_down(key::BACKSPACE) {
                     func_body.pop();
+                } else if keyboard_state.key_down(key::XNT) {
+                    func_body.push(MathInstruction::Z).unwrap();
                 } else if keyboard_state.key_down(key::IMAGINARY) {
                     func_body.push(MathInstruction::Imag).unwrap();
+                } else if keyboard_state.key_down(key::PI) {
+                    func_body.push(MathInstruction::Pi).unwrap();
+                } else if keyboard_state.key_down(key::SHIFT) && keyboard_state.key_down(key::EXP) {
+                    func_body.push(MathInstruction::E).unwrap();
                 } else if keyboard_state.key_down(key::PLUS) {
                     func_body.push(MathInstruction::Add).unwrap();
                 } else if keyboard_state.key_down(key::MINUS) {
@@ -331,12 +333,16 @@ fn _eadk_main() {
                     func_body.push(MathInstruction::Exp).unwrap();
                 } else if keyboard_state.key_down(key::LN) {
                     func_body.push(MathInstruction::Log).unwrap();
+                } else if keyboard_state.key_down(key::SINE) {
+                    func_body.push(MathInstruction::Sin).unwrap();
+                } else if keyboard_state.key_down(key::COSINE) {
+                    func_body.push(MathInstruction::Cos).unwrap();
                 } else if keyboard_state.key_down(key::SQUARE) {
                     func_body.push(MathInstruction::Number(2.)).unwrap();
                     func_body.push(MathInstruction::Pow).unwrap();
                 } else if keyboard_state.key_down(key::BACK) {
                     state.mode = StateMode::Default;
-                    plot_func(&state);
+                    // plot_func(&state);
                 } else if keyboard_state.key_down(key::OK) {
                     state.func = FastFunction::from(func_body.clone());
                     state.mode = StateMode::Default;
