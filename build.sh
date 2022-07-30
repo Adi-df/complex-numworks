@@ -4,7 +4,7 @@ rm -r dust
 mkdir dust
 
 cargo build --target=thumbv7em-none-eabihf --lib --release
-cp target/thumbv7em-none-eabihf/debug/libapp.a dust/libapp.a
+cp target/thumbv7em-none-eabihf/release/libapp.a dust/libapp.a
 ar x dust/libapp.a --output=dust
 
 arm-none-eabi-gcc -Os -Wl,-Ur --specs=nosys.specs \
