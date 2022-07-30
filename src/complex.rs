@@ -130,7 +130,7 @@ impl Add<f64> for Complex {
     fn add(self, rhs: f64) -> Complex {
         Complex {
             real: self.real + rhs,
-            imag: self.imag + rhs,
+            imag: self.imag,
         }
     }
 }
@@ -139,7 +139,7 @@ impl Sub<f64> for Complex {
     fn sub(self, rhs: f64) -> Complex {
         Complex {
             real: self.real - rhs,
-            imag: self.imag - rhs,
+            imag: self.imag,
         }
     }
 }
@@ -165,13 +165,11 @@ impl Div<f64> for Complex {
 impl AddAssign<f64> for Complex {
     fn add_assign(&mut self, rhs: f64) {
         self.real += rhs;
-        self.imag += rhs;
     }
 }
 impl SubAssign<f64> for Complex {
     fn sub_assign(&mut self, rhs: f64) {
         self.real -= rhs;
-        self.imag -= rhs;
     }
 }
 impl MulAssign<f64> for Complex {
