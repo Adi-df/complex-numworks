@@ -56,8 +56,10 @@ pub struct Point {
 }
 
 impl Point {
+    pub const ZERO: Point = Point::new(0, 0);
+
     #[must_use]
-    pub fn new(x: u16, y: u16) -> Self {
+    pub const fn new(x: u16, y: u16) -> Self {
         Self { x, y }
     }
 }

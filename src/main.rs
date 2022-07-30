@@ -52,20 +52,22 @@ fn sigmoid_complex_to_color(z: Complex) -> Color {
     Color::from_hsv(hue, saturation, value)
 }
 
-fn plot_func(state: &State) {
-    (0..SCREEN_HEIGHT).for_each(|y| {
+fn plot_rect(state: &State, rect: Rect) {
+    (rect.y..rect.height).for_each(|y| {
         let imag = (1. - y as f64 / SCREEN_HEIGHT as f64)
             * (state.area.to_imag - state.area.from_imag)
             + state.area.from_imag;
-        (0..SCREEN_WIDTH)
-            .map(move |x| Complex {
-                real: (x as f64 / SCREEN_WIDTH as f64)
-                    * (state.area.to_real - state.area.from_real)
-                    + state.area.from_real,
-                imag,
+        (rect.x..rect.width)
+            .map(move |x| {
+                (x, {
+                    state.func.eval(Complex {
+                        real: (x as f64 / SCREEN_WIDTH as f64)
+                            * (state.area.to_real - state.area.from_real)
+                            + state.area.from_real,
+                        imag,
+                    })
+                })
             })
-            .map(|z| state.func.eval(z))
-            .enumerate()
             .for_each(|(x, z)| {
                 display::push_rect(
                     Rect {
@@ -78,6 +80,18 @@ fn plot_func(state: &State) {
                 );
             });
     });
+}
+
+fn plot_func(state: &State) {
+    plot_rect(
+        state,
+        Rect {
+            x: 0,
+            y: 0,
+            width: SCREEN_WIDTH,
+            height: SCREEN_HEIGHT,
+        },
+    );
 }
 
 #[derive(Clone)]
@@ -245,33 +259,16 @@ fn _eadk_main() {
                     y += 1;
                 } else if keyboard_state.key_down(key::BACK) {
                     state.mode = StateMode::Default;
-                    timing::msleep(200);
 
-                    (0..eadk::display::SCREEN_WIDTH).for_each(|x| {
-                        let real = (x as f64 / SCREEN_WIDTH as f64)
-                            * (state.area.to_real - state.area.from_real)
-                            + state.area.from_real;
-                        (0..30)
-                            .map(|y| Complex {
-                                real,
-                                imag: (1. - y as f64 / SCREEN_HEIGHT as f64)
-                                    * (state.area.to_imag - state.area.from_imag)
-                                    + state.area.from_imag,
-                            })
-                            .map(|z| state.func.eval(z))
-                            .enumerate()
-                            .for_each(|(y, z)| {
-                                display::push_rect_uniform(
-                                    Rect {
-                                        x,
-                                        y: y as u16,
-                                        width: 1,
-                                        height: 1,
-                                    },
-                                    (state.color_mode)(z),
-                                );
-                            });
-                    });
+                    plot_rect(
+                        &state,
+                        Rect {
+                            x: 0,
+                            y: 0,
+                            width: SCREEN_WIDTH,
+                            height: 30,
+                        },
+                    );
 
                     continue;
                 }
@@ -292,6 +289,17 @@ fn _eadk_main() {
                 timing::msleep(50);
             }
             StateMode::FunctionEditor => {
+                let number_pressed = keyboard_state.key_down(key::ZERO)
+                    || keyboard_state.key_down(key::ONE)
+                    || keyboard_state.key_down(key::TWO)
+                    || keyboard_state.key_down(key::THREE)
+                    || keyboard_state.key_down(key::FOUR)
+                    || keyboard_state.key_down(key::FIVE)
+                    || keyboard_state.key_down(key::SIX)
+                    || keyboard_state.key_down(key::SEVEN)
+                    || keyboard_state.key_down(key::EIGHT)
+                    || keyboard_state.key_down(key::NINE);
+
                 display::push_rect_uniform(
                     Rect {
                         x: 0,
@@ -340,9 +348,69 @@ fn _eadk_main() {
                 } else if keyboard_state.key_down(key::SQUARE) {
                     func_body.push(MathInstruction::Number(2.)).unwrap();
                     func_body.push(MathInstruction::Pow).unwrap();
+                } else if number_pressed {
+                    let mut num: String<32> = String::new();
+                    loop {
+                        display::push_rect_uniform(
+                            Rect {
+                                x: 0,
+                                y: 0,
+                                width: SCREEN_WIDTH,
+                                height: 30,
+                            },
+                            Color::WHITE,
+                        );
+                        display::draw_string(&num, Point::ZERO, false, Color::BLACK, Color::WHITE);
+
+                        let keyboard_state = keyboard::scan();
+
+                        num.pop();
+                        if keyboard_state.key_down(key::ZERO) {
+                            num.push('0').unwrap();
+                        } else if keyboard_state.key_down(key::ONE) {
+                            num.push('1').unwrap();
+                        } else if keyboard_state.key_down(key::TWO) {
+                            num.push('2').unwrap();
+                        } else if keyboard_state.key_down(key::THREE) {
+                            num.push('3').unwrap();
+                        } else if keyboard_state.key_down(key::FOUR) {
+                            num.push('4').unwrap();
+                        } else if keyboard_state.key_down(key::FIVE) {
+                            num.push('5').unwrap();
+                        } else if keyboard_state.key_down(key::SIX) {
+                            num.push('6').unwrap();
+                        } else if keyboard_state.key_down(key::SEVEN) {
+                            num.push('7').unwrap();
+                        } else if keyboard_state.key_down(key::EIGHT) {
+                            num.push('8').unwrap();
+                        } else if keyboard_state.key_down(key::NINE) {
+                            num.push('9').unwrap();
+                        } else if keyboard_state.key_down(key::DOT) {
+                            num.push('.').unwrap();
+                        } else if keyboard_state.key_down(key::BACKSPACE) {
+                            num.pop();
+                        } else if keyboard_state.key_down(key::EXE) {
+                            func_body
+                                .push(MathInstruction::Number(num.parse().unwrap()))
+                                .unwrap();
+                            break;
+                        }
+                        num.push('\0').unwrap();
+
+                        timing::msleep(100);
+                        display::wait_for_vblank();
+                    }
                 } else if keyboard_state.key_down(key::BACK) {
                     state.mode = StateMode::Default;
-                    // plot_func(&state);
+                    plot_rect(
+                        &state,
+                        Rect {
+                            x: 0,
+                            y: 0,
+                            width: SCREEN_WIDTH,
+                            height: 30,
+                        },
+                    );
                 } else if keyboard_state.key_down(key::OK) {
                     state.func = FastFunction::from(func_body.clone());
                     state.mode = StateMode::Default;
