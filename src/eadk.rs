@@ -1,9 +1,7 @@
-use palette::convert::FromColorUnclamped;
-use palette::rgb::Rgb;
-use palette::Hsv;
-use palette::RgbHue;
+use core::f64::consts::PI;
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Color {
     pub rgb565: u16,
 }
@@ -31,17 +29,33 @@ impl Color {
 
     #[must_use]
     pub fn from_hsv(hue: f64, saturation: f64, value: f64) -> Self {
-        let rgb = Rgb::from_color_unclamped(Hsv::new(RgbHue::from_radians(hue), saturation, value));
-
+        let f = |n: f64| {
+            let k: f64 = (n + hue / PI * 3.) % 6.;
+            value * (1. - saturation * k.min(4. - k).min(1.).max(0.))
+        };
         Color::from_rgb888(
-            (rgb.red * 255.) as u8,
-            (rgb.green * 255.) as u8,
-            (rgb.blue * 255.) as u8,
+            (f(5.) * 255.) as u8,
+            (f(3.) * 255.) as u8,
+            (f(1.) * 255.) as u8,
+        )
+    }
+
+    #[must_use]
+    pub fn from_hv(hue: f64, value: f64) -> Self {
+        let f = |n: f64| {
+            let k: f64 = (n + hue / PI * 3.) % 6.;
+            value * (1. - k.min(4. - k).min(1.).max(0.))
+        };
+        Color::from_rgb888(
+            (f(5.) * 255.) as u8,
+            (f(3.) * 255.) as u8,
+            (f(1.) * 255.) as u8,
         )
     }
 }
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Rect {
     pub x: u16,
     pub y: u16,
@@ -50,6 +64,7 @@ pub struct Rect {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Point {
     pub x: u16,
     pub y: u16,
@@ -65,6 +80,7 @@ impl Point {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct State(u64);
 
 impl State {

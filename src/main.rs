@@ -10,7 +10,7 @@ use eadk::{
 use core::fmt::Write;
 
 use heapless::String;
-use libm::{exp, fabs, log10, log2};
+use libm::{exp, fabs, log10, log2, trunc};
 
 mod complex;
 use complex::Complex;
@@ -40,16 +40,16 @@ fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
 }
 
 fn log2_complex_to_color(z: Complex) -> Color {
-    let (hue, saturation, value) = (z.argument(), 1., fabs(log2(z.modulus())) % 1.);
-    Color::from_hsv(hue, saturation, value)
+    let value = fabs(log2(z.modulus()));
+    Color::from_hv(z.argument(), value - trunc(value))
 }
 fn log10_complex_to_color(z: Complex) -> Color {
-    let (hue, saturation, value) = (z.argument(), 1., fabs(log10(z.modulus())) % 1.);
-    Color::from_hsv(hue, saturation, value)
+    let value = fabs(log10(z.modulus()));
+    Color::from_hv(z.argument(), value - trunc(value))
 }
 fn sigmoid_complex_to_color(z: Complex) -> Color {
-    let (hue, saturation, value) = (z.argument(), 1., (1. / (1. + exp(-z.modulus()))) * 2. - 1.);
-    Color::from_hsv(hue, saturation, value)
+    let value = (2. / (1. + exp(-z.modulus()))) - 1.;
+    Color::from_hv(z.argument(), value)
 }
 
 fn plot_rect(state: &State, rect: Rect) {
