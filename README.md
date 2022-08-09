@@ -1,55 +1,33 @@
-# Sample Rust app for Epsilon
+# Complex Numworks
+A (terrible) complex function plotter for the numworks calculator.
 
-[![Build](https://github.com/numworks/epsilon-sample-app-rust/actions/workflows/build.yml/badge.svg)](https://github.com/numworks/epsilon-sample-app-rust/actions/workflows/build.yml)
+Poorly written.
+(Trying to be) Fast (And failing to...)
+Working (Kind of...)
 
-<img src="/doc/screenshots.gif?raw=true" alt="Sample Rust app for the NumWorks graphing calculator" width="300" align="right">
+## How to install
+Use the [Numwroks online uploader](https://my.numworks.com/apps) with the app.nwa in the build directory.
 
-This is a sample [Rust](https://www.rust-lang.org) app to use on a [NumWorks calculator](https://www.numworks.com). Yes, you can now use Rust to write code for a graphing calculator!
+## How to use
+By default, values from -10-10i to 10+10i are plotted
+You can move arround using arrow keys, zoom in and out using +/- keys.
+And Home key to exit.
 
-```rust
-fn eadk_main() {
-    for _ in 0..100 {
-        let c = eadk::Color { rgb565: random_u16() };
-        let r = eadk::Rect { x: random_coordinate(), y: random_coordinate(), width: random_coordinate(), height: random_coordinate() };
-        eadk::display::push_rect_uniform(r, c);
-    }
-    loop {}
-}
-```
+Press Alpha +
+ - E to make the axes equal
+ - S to activate/desactivate level lines
 
-## Build the app
+Use the VAR key to enter value mode where a white dot moveable using the arrow keys display the values of `z` and `f(z)`.
+Return to default mode by using the BACK key
 
-You need to install an embedded ARM rust compiler as well as [nwlink](https://www.npmjs.com/package/nwlink).
+Use the TOOLBOX key to change the function:
+**IT'S A [RPN](https://en.wikipedia.org/wiki/Reverse_Polish_notation) NOTATION**
 
-```shell
-brew install rustup node # Or equivalent on your OS
-rustup-init
-rustup target add thumbv7em-none-eabihf
-npm install -g nwlink
-cargo build
-```
+To enter a **real** number, press any digit and type your number then press EXE
+For a complex one, just enter a real, use the I key and then just add another real as usual.
 
-## Run the app
+Parenthesis aren't implemented as there's no need for it in RPN
+Square root, Tangent, log10 and inverse trig function are still not implemented.
 
-The app is sent over to the calculator using the DFU protocol over USB.
-
-```shell
-# Now connect your NumWorks calculator to your computer using the USB cable
-cargo run
-```
-
-## Notes
-
-The NumWorks calculator runs [Epsilon](http://github.com/numworks/epsilon), a tailor-made calculator operating system. Starting from version 16, Epsilon allows installing custom binary apps. To run this sample app, make sure your calculator is up-to-date by visiting https://my.numworks.com.
-
-Due to the embedded nature of Epsilon, the Rust app has to be `no_std`. The interface that an app can use to interact with the OS is essentially a short list of system calls. Feel free to browse the [code of Epsilon](http://github.com/numworks/epsilon) itself if you want to get an in-depth look.
-
-Please note that any custom app is removed when resetting the calculator.
-
-## License
-
-This sample app is distributed under the terms of the BSD License. See LICENSE for details.
-
-## Trademarks
-
-NumWorks and Rust are a registered trademarks.
+## Why using it?
+Despair.

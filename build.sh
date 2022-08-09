@@ -12,6 +12,6 @@ arm-none-eabi-gcc -Os -Wl,-Ur --specs=nosys.specs \
  -ggdb3 -mthumb -mfloat-abi=hard -mcpu=cortex-m7 \
  -mfloat-abi=hard -mfpu=fpv5-sp-d16 -fno-common \
  -fdata-sections -ffunction-sections -fno-exceptions \
- $(ls dust/*.o | grep -v "divxc3\.o") -o dust/app.nwa
+ $(ls dust/*.o | grep -v "divxc3\.o") -o build/app.nwa
 
-nwlink install-nwa dust/app.nwa
+nwlink install-nwa build/app.nwa
