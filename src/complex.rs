@@ -112,16 +112,12 @@ impl SubAssign<Complex> for Complex {
 }
 impl MulAssign<Complex> for Complex {
     fn mul_assign(&mut self, rhs: Complex) {
-        self.real = self.real * rhs.real - self.imag * rhs.imag;
-        self.imag = self.real * rhs.imag + self.imag * rhs.real;
+        *self = *self * rhs;
     }
 }
 impl DivAssign<Complex> for Complex {
     fn div_assign(&mut self, rhs: Complex) {
-        *self *= Complex {
-            real: rhs.real / (rhs.real * rhs.real + rhs.imag * rhs.imag),
-            imag: -rhs.imag / (rhs.real * rhs.real + rhs.imag * rhs.imag),
-        }
+        *self = *self / rhs;
     }
 }
 
