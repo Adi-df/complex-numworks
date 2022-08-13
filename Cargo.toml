@@ -4,14 +4,14 @@ version = "0.1.0"
 authors = ["NumWorks <contact@numworks.com>"]
 edition = "2018"
 
-[lib]
-name = "app"
-path = "src/main.rs"
-test = false
-doctest = false
-bench = false
-doc = false
-crate-type = ["staticlib"]
+# [lib]
+# name = "app"
+# path = "src/main.rs"
+# test = false
+# doctest = false
+# bench = false
+# doc = false
+# crate-type = ["staticlib"]
 
 [profile.release]
 lto = "fat"
