@@ -53,32 +53,32 @@ fn sigmoid_complex_to_color(z: Complex) -> Color {
 }
 
 fn plot_rect(state: &State, rect: Rect) {
+    let mut row: [Color; SCREEN_WIDTH as usize] = [Color::BLACK; SCREEN_WIDTH as usize];
     (rect.y..rect.height).for_each(|y| {
         let imag = (1. - y as f32 / SCREEN_HEIGHT as f32)
             * (state.area.to_imag - state.area.from_imag)
             + state.area.from_imag;
-        (rect.x..rect.width)
-            .map(move |x| {
-                (x, {
-                    state.func.eval(Complex {
-                        real: (x as f32 / SCREEN_WIDTH as f32)
-                            * (state.area.to_real - state.area.from_real)
-                            + state.area.from_real,
-                        imag,
-                    })
-                })
-            })
-            .for_each(|(x, z)| {
-                display::push_rect(
-                    Rect {
-                        x: x as u16,
-                        y: y as u16,
-                        width: 1,
-                        height: 1,
-                    },
-                    &[(state.color_mode)(z)],
-                );
+
+        (&mut row[0..rect.width as usize])
+            .iter_mut()
+            .enumerate()
+            .for_each(move |(x, p)| {
+                *p = (state.color_mode)(state.func.eval(Complex {
+                    real: (x as f32 / SCREEN_WIDTH as f32)
+                        * (state.area.to_real - state.area.from_real)
+                        + state.area.from_real,
+                    imag,
+                }))
             });
+        display::push_rect(
+            Rect {
+                x: rect.x,
+                y,
+                width: rect.width,
+                height: 1,
+            },
+            &row,
+        );
     });
 }
 
