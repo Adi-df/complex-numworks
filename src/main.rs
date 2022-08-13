@@ -10,7 +10,7 @@ use eadk::{
 use core::fmt::Write;
 
 use heapless::String;
-use libm::{expf, fabsf, log10f, log2f, truncf};
+use libm::{expf, fabsf, log2f, truncf};
 
 mod complex;
 use complex::Complex;
@@ -20,7 +20,7 @@ use function::{Evaluate, FastFunction, Function, MathInstruction, StringFunction
 
 #[export_name = "eadk_app_name"]
 #[link_section = ".rodata.eadk_app_name"]
-pub static EADK_APP_NAME: [u8; 10] = *b"HelloRust\0";
+pub static EADK_APP_NAME: [u8; 10] = *b"ComplexNW\0";
 
 #[export_name = "eadk_app_api_level"]
 #[link_section = ".rodata.eadk_app_api_level"]
