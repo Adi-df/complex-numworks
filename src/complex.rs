@@ -1,14 +1,14 @@
-use core::f64::consts::PI;
+use core::f32::consts::PI;
 use core::fmt::Display;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use libm::{atan2, cos, exp, sin};
-use libm::{log, sqrt};
+use libm::{atan2f, cosf, expf, sinf};
+use libm::{logf, sqrtf};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Complex {
-    pub real: f64,
-    pub imag: f64,
+    pub real: f32,
+    pub imag: f32,
 }
 
 impl Display for Complex {
@@ -20,23 +20,23 @@ impl Display for Complex {
 impl Complex {
     pub const ZERO: Complex = Complex { real: 0., imag: 0. };
 
-    pub fn from_real(real: f64) -> Self {
+    pub fn from_real(real: f32) -> Self {
         Complex { real, imag: 0. }
     }
-    pub fn from_imag(imag: f64) -> Self {
+    pub fn from_imag(imag: f32) -> Self {
         Complex { real: 0., imag }
     }
 
-    pub fn squared_modulus(&self) -> f64 {
+    pub fn squared_modulus(&self) -> f32 {
         self.real * self.real + self.imag * self.imag
     }
 
-    pub fn modulus(&self) -> f64 {
-        sqrt(self.squared_modulus())
+    pub fn modulus(&self) -> f32 {
+        sqrtf(self.squared_modulus())
     }
 
-    pub fn argument(&self) -> f64 {
-        let a = atan2(self.imag, self.real);
+    pub fn argument(&self) -> f32 {
+        let a = atan2f(self.imag, self.real);
         if a < 0. {
             a + 2. * PI
         } else {
@@ -44,7 +44,7 @@ impl Complex {
         }
     }
 
-    pub fn polar(&self) -> (f64, f64) {
+    pub fn polar(&self) -> (f32, f32) {
         (self.argument(), self.modulus())
     }
 
@@ -125,36 +125,36 @@ impl DivAssign<Complex> for Complex {
     }
 }
 
-impl Add<f64> for Complex {
+impl Add<f32> for Complex {
     type Output = Complex;
-    fn add(self, rhs: f64) -> Complex {
+    fn add(self, rhs: f32) -> Complex {
         Complex {
             real: self.real + rhs,
             imag: self.imag,
         }
     }
 }
-impl Sub<f64> for Complex {
+impl Sub<f32> for Complex {
     type Output = Complex;
-    fn sub(self, rhs: f64) -> Complex {
+    fn sub(self, rhs: f32) -> Complex {
         Complex {
             real: self.real - rhs,
             imag: self.imag,
         }
     }
 }
-impl Mul<f64> for Complex {
+impl Mul<f32> for Complex {
     type Output = Complex;
-    fn mul(self, rhs: f64) -> Complex {
+    fn mul(self, rhs: f32) -> Complex {
         Complex {
             real: self.real * rhs,
             imag: self.imag * rhs,
         }
     }
 }
-impl Div<f64> for Complex {
+impl Div<f32> for Complex {
     type Output = Complex;
-    fn div(self, rhs: f64) -> Complex {
+    fn div(self, rhs: f32) -> Complex {
         Complex {
             real: self.real / rhs,
             imag: self.imag / rhs,
@@ -162,24 +162,24 @@ impl Div<f64> for Complex {
     }
 }
 
-impl AddAssign<f64> for Complex {
-    fn add_assign(&mut self, rhs: f64) {
+impl AddAssign<f32> for Complex {
+    fn add_assign(&mut self, rhs: f32) {
         self.real += rhs;
     }
 }
-impl SubAssign<f64> for Complex {
-    fn sub_assign(&mut self, rhs: f64) {
+impl SubAssign<f32> for Complex {
+    fn sub_assign(&mut self, rhs: f32) {
         self.real -= rhs;
     }
 }
-impl MulAssign<f64> for Complex {
-    fn mul_assign(&mut self, rhs: f64) {
+impl MulAssign<f32> for Complex {
+    fn mul_assign(&mut self, rhs: f32) {
         self.real *= rhs;
         self.imag *= rhs;
     }
 }
-impl DivAssign<f64> for Complex {
-    fn div_assign(&mut self, rhs: f64) {
+impl DivAssign<f32> for Complex {
+    fn div_assign(&mut self, rhs: f32) {
         self.real /= rhs;
         self.imag /= rhs;
     }
@@ -207,10 +207,10 @@ pub trait Trig {
     fn cos(self) -> Self::Output;
 }
 
-impl Pow<f64> for Complex {
+impl Pow<f32> for Complex {
     type Output = Complex;
 
-    fn pow(self, exp: f64) -> Complex {
+    fn pow(self, exp: f32) -> Complex {
         (self.log() * exp).exp()
     }
 }
@@ -227,15 +227,15 @@ impl Exp for Complex {
 
     fn exp(self) -> Complex {
         Complex {
-            real: cos(self.imag) * exp(self.real),
-            imag: sin(self.imag) * exp(self.real),
+            real: cosf(self.imag) * expf(self.real),
+            imag: sinf(self.imag) * expf(self.real),
         }
     }
 }
-impl Exp for f64 {
-    type Output = f64;
-    fn exp(self) -> f64 {
-        exp(self)
+impl Exp for f32 {
+    type Output = f32;
+    fn exp(self) -> f32 {
+        expf(self)
     }
 }
 
@@ -244,15 +244,15 @@ impl Log for Complex {
 
     fn log(self) -> Complex {
         Complex {
-            real: log(self.modulus()),
+            real: logf(self.modulus()),
             imag: self.argument(),
         }
     }
 }
-impl Log for f64 {
-    type Output = f64;
-    fn log(self) -> f64 {
-        log(self)
+impl Log for f32 {
+    type Output = f32;
+    fn log(self) -> f32 {
+        logf(self)
     }
 }
 
@@ -261,24 +261,24 @@ impl Trig for Complex {
 
     fn sin(self) -> Complex {
         Complex {
-            real: sin(self.real) * (exp(-self.imag) + exp(self.imag)) / 2.,
-            imag: -cos(self.real) * (exp(-self.imag) - exp(self.imag)) / 2.,
+            real: sinf(self.real) * (expf(-self.imag) + expf(self.imag)) / 2.,
+            imag: -cosf(self.real) * (expf(-self.imag) - expf(self.imag)) / 2.,
         }
     }
     fn cos(self) -> Complex {
         Complex {
-            real: cos(self.real) * (exp(-self.imag) + exp(self.imag)) / 2.,
-            imag: sin(self.real) * (exp(-self.imag) - exp(self.imag)) / 2.,
+            real: cosf(self.real) * (expf(-self.imag) + expf(self.imag)) / 2.,
+            imag: sinf(self.real) * (expf(-self.imag) - expf(self.imag)) / 2.,
         }
     }
 }
-impl Trig for f64 {
-    type Output = f64;
+impl Trig for f32 {
+    type Output = f32;
 
-    fn sin(self) -> f64 {
-        sin(self)
+    fn sin(self) -> f32 {
+        sinf(self)
     }
-    fn cos(self) -> f64 {
-        cos(self)
+    fn cos(self) -> f32 {
+        cosf(self)
     }
 }

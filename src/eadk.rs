@@ -1,4 +1,4 @@
-use core::f64::consts::PI;
+use core::f32::consts::PI;
 
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -28,9 +28,9 @@ impl Color {
     }
 
     #[must_use]
-    pub fn from_hsv(hue: f64, saturation: f64, value: f64) -> Self {
-        let f = |n: f64| {
-            let k: f64 = (n + hue / PI * 3.) % 6.;
+    pub fn from_hsv(hue: f32, saturation: f32, value: f32) -> Self {
+        let f = |n: f32| {
+            let k: f32 = (n + hue / PI * 3.) % 6.;
             value * (1. - saturation * k.min(4. - k).min(1.).max(0.))
         };
         Color::from_rgb888(
@@ -41,9 +41,9 @@ impl Color {
     }
 
     #[must_use]
-    pub fn from_hv(hue: f64, value: f64) -> Self {
-        let f = |n: f64| {
-            let k: f64 = (n + hue / PI * 3.) % 6.;
+    pub fn from_hv(hue: f32, value: f32) -> Self {
+        let f = |n: f32| {
+            let k: f32 = (n + hue / PI * 3.) % 6.;
             value * (1. - k.min(4. - k).min(1.).max(0.))
         };
         Color::from_rgb888(

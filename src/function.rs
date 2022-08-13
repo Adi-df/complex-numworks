@@ -1,5 +1,5 @@
 use core::{
-    f64::consts::{E, PI},
+    f32::consts::{E, PI},
     fmt::{Display, Write},
     iter::IntoIterator,
     ops::{Deref, DerefMut},
@@ -26,7 +26,7 @@ pub type StringFunction = String<FUNCTION_STRING_SIZE>;
 #[derive(Clone, Debug)]
 pub enum MathInstruction {
     Z,
-    Number(f64),
+    Number(f32),
 
     Imag,
     Pi,
@@ -56,11 +56,11 @@ pub enum FastMathInstr {
     Div(Complex),
     Pow(Complex),
 
-    AddR(f64),
-    SubR(f64),
-    MulR(f64),
-    DivR(f64),
-    PowR(f64),
+    AddR(f32),
+    SubR(f32),
+    MulR(f32),
+    DivR(f32),
+    PowR(f32),
 
     AddZ,
     SubZ,

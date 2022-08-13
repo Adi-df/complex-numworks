@@ -10,7 +10,7 @@ use eadk::{
 use core::fmt::Write;
 
 use heapless::String;
-use libm::{exp, fabs, log10, log2, trunc};
+use libm::{expf, fabsf, log10f, log2f, truncf};
 
 mod complex;
 use complex::Complex;
@@ -32,36 +32,36 @@ pub static EADK_APP_ICON: [u8; 4250] = *include_bytes!("../target/icon.nwi");
 
 fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
     Complex {
-        real: (pos.0 as f64 / SCREEN_WIDTH as f64) * (area.to_real - area.from_real)
+        real: (pos.0 as f32 / SCREEN_WIDTH as f32) * (area.to_real - area.from_real)
             + area.from_real,
-        imag: (1. - pos.1 as f64 / SCREEN_HEIGHT as f64) * (area.to_imag - area.from_imag)
+        imag: (1. - pos.1 as f32 / SCREEN_HEIGHT as f32) * (area.to_imag - area.from_imag)
             + area.from_imag,
     }
 }
 
 fn log2_complex_to_color(z: Complex) -> Color {
-    let value = fabs(log2(z.modulus()));
-    Color::from_hv(z.argument(), value - trunc(value))
+    let value = fabsf(log2f(z.modulus()));
+    Color::from_hv(z.argument(), value - truncf(value))
 }
 // fn log10_complex_to_color(z: Complex) -> Color {
 //     let value = fabs(log10(z.modulus()));
 //     Color::from_hv(z.argument(), value - trunc(value))
 // }
 fn sigmoid_complex_to_color(z: Complex) -> Color {
-    let value = (2. / (1. + exp(-z.modulus()))) - 1.;
+    let value = (2. / (1. + expf(-z.modulus()))) - 1.;
     Color::from_hv(z.argument(), value)
 }
 
 fn plot_rect(state: &State, rect: Rect) {
     (rect.y..rect.height).for_each(|y| {
-        let imag = (1. - y as f64 / SCREEN_HEIGHT as f64)
+        let imag = (1. - y as f32 / SCREEN_HEIGHT as f32)
             * (state.area.to_imag - state.area.from_imag)
             + state.area.from_imag;
         (rect.x..rect.width)
             .map(move |x| {
                 (x, {
                     state.func.eval(Complex {
-                        real: (x as f64 / SCREEN_WIDTH as f64)
+                        real: (x as f32 / SCREEN_WIDTH as f32)
                             * (state.area.to_real - state.area.from_real)
                             + state.area.from_real,
                         imag,
@@ -96,10 +96,10 @@ fn plot_func(state: &State) {
 
 #[derive(Clone)]
 struct ComplexRect {
-    from_real: f64,
-    to_real: f64,
-    from_imag: f64,
-    to_imag: f64,
+    from_real: f32,
+    to_real: f32,
+    from_imag: f32,
+    to_imag: f32,
 }
 
 struct State {
@@ -189,7 +189,7 @@ fn _eadk_main() {
                 else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::COMMA)
                 {
                     let shift = (state.area.to_real - state.area.from_real)
-                        * (SCREEN_HEIGHT as f64 / SCREEN_WIDTH as f64)
+                        * (SCREEN_HEIGHT as f32 / SCREEN_WIDTH as f32)
                         / 2.;
                     let mean = (state.area.to_imag + state.area.from_imag) / 2.;
 
