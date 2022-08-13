@@ -28,7 +28,7 @@ pub static EADK_APP_API_LEVEL: u32 = 0;
 
 #[export_name = "eadk_app_icon"]
 #[link_section = ".rodata.eadk_app_icon"]
-pub static EADK_APP_ICON: [u8; 4250] = *include_bytes!("../target/icon.nwi");
+pub static EADK_APP_ICON: [u8; 1669] = *include_bytes!("../target/icon.nwi");
 
 fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
     Complex {
