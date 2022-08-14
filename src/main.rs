@@ -43,10 +43,6 @@ fn log2_complex_to_color(z: Complex) -> Color {
     let value = fabsf(log2f(z.modulus()));
     Color::from_hv(z.argument(), value - truncf(value))
 }
-// fn log10_complex_to_color(z: Complex) -> Color {
-//     let value = fabs(log10(z.modulus()));
-//     Color::from_hv(z.argument(), value - trunc(value))
-// }
 fn sigmoid_complex_to_color(z: Complex) -> Color {
     let value = (2. / (1. + expf(-z.modulus()))) - 1.;
     Color::from_hv(z.argument(), value)
@@ -92,6 +88,39 @@ fn plot_func(state: &State) {
             height: SCREEN_HEIGHT,
         },
     );
+}
+
+fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
+    let keyboard_state = keyboard::scan();
+
+    if keyboard_state.key_down(key::ZERO) {
+        num.push('0').unwrap();
+    } else if keyboard_state.key_down(key::ONE) {
+        num.push('1').unwrap();
+    } else if keyboard_state.key_down(key::TWO) {
+        num.push('2').unwrap();
+    } else if keyboard_state.key_down(key::THREE) {
+        num.push('3').unwrap();
+    } else if keyboard_state.key_down(key::FOUR) {
+        num.push('4').unwrap();
+    } else if keyboard_state.key_down(key::FIVE) {
+        num.push('5').unwrap();
+    } else if keyboard_state.key_down(key::SIX) {
+        num.push('6').unwrap();
+    } else if keyboard_state.key_down(key::SEVEN) {
+        num.push('7').unwrap();
+    } else if keyboard_state.key_down(key::EIGHT) {
+        num.push('8').unwrap();
+    } else if keyboard_state.key_down(key::NINE) {
+        num.push('9').unwrap();
+    } else if keyboard_state.key_down(key::DOT) {
+        num.push('.').unwrap();
+    } else if keyboard_state.key_down(key::BACKSPACE) {
+        num.pop();
+    } else if keyboard_state.key_down(key::EXE) {
+        return Some(num.parse().unwrap());
+    }
+    None
 }
 
 #[derive(Clone)]
@@ -207,6 +236,60 @@ fn _eadk_main() {
                         .unwrap_or(0)
                         + 1)
                         % color_modes.len()];
+
+                    plot_func(&state);
+                }
+                // Go to
+                else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::SINE)
+                {
+                    let mut x: String<20> = String::new();
+                    let mut y: String<20> = String::new();
+                    let mut y_selected = false;
+
+                    let x_margin = (state.area.to_real - state.area.from_real) / 2.;
+                    let y_margin = (state.area.to_imag - state.area.from_imag) / 2.;
+
+                    loop {
+                        display::push_rect_uniform(
+                            Rect {
+                                x: 0,
+                                y: 0,
+                                width: SCREEN_WIDTH,
+                                height: 30,
+                            },
+                            Color::WHITE,
+                        );
+
+                        let mut pos_str: String<50> = String::new();
+                        write!(&mut pos_str, "x = {}\ny = {}\0", x, y).unwrap();
+                        display::draw_string(
+                            &pos_str,
+                            Point::ZERO,
+                            false,
+                            Color::BLACK,
+                            Color::WHITE,
+                        );
+
+                        match y_selected {
+                            false => {
+                                if let Some(num) = keyboard_number(&mut x) {
+                                    state.area.from_real = num - x_margin;
+                                    state.area.to_real = num + x_margin;
+                                    y_selected = true;
+                                }
+                            }
+                            true => {
+                                if let Some(num) = keyboard_number(&mut y) {
+                                    state.area.from_imag = num - y_margin;
+                                    state.area.to_imag = num + y_margin;
+                                    break;
+                                }
+                            }
+                        }
+
+                        timing::msleep(100);
+                        display::wait_for_vblank();
+                    }
 
                     plot_func(&state);
                 }
@@ -360,42 +443,15 @@ fn _eadk_main() {
                             },
                             Color::WHITE,
                         );
+
+                        num.push('\0').unwrap();
                         display::draw_string(&num, Point::ZERO, false, Color::BLACK, Color::WHITE);
+                        num.pop().unwrap();
 
-                        let keyboard_state = keyboard::scan();
-
-                        num.pop();
-                        if keyboard_state.key_down(key::ZERO) {
-                            num.push('0').unwrap();
-                        } else if keyboard_state.key_down(key::ONE) {
-                            num.push('1').unwrap();
-                        } else if keyboard_state.key_down(key::TWO) {
-                            num.push('2').unwrap();
-                        } else if keyboard_state.key_down(key::THREE) {
-                            num.push('3').unwrap();
-                        } else if keyboard_state.key_down(key::FOUR) {
-                            num.push('4').unwrap();
-                        } else if keyboard_state.key_down(key::FIVE) {
-                            num.push('5').unwrap();
-                        } else if keyboard_state.key_down(key::SIX) {
-                            num.push('6').unwrap();
-                        } else if keyboard_state.key_down(key::SEVEN) {
-                            num.push('7').unwrap();
-                        } else if keyboard_state.key_down(key::EIGHT) {
-                            num.push('8').unwrap();
-                        } else if keyboard_state.key_down(key::NINE) {
-                            num.push('9').unwrap();
-                        } else if keyboard_state.key_down(key::DOT) {
-                            num.push('.').unwrap();
-                        } else if keyboard_state.key_down(key::BACKSPACE) {
-                            num.pop();
-                        } else if keyboard_state.key_down(key::EXE) {
-                            func_body
-                                .push(MathInstruction::Number(num.parse().unwrap()))
-                                .unwrap();
+                        if let Some(num) = keyboard_number(&mut num) {
+                            func_body.push(MathInstruction::Number(num)).unwrap();
                             break;
                         }
-                        num.push('\0').unwrap();
 
                         timing::msleep(100);
                         display::wait_for_vblank();
