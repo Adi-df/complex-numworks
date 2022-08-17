@@ -11,7 +11,7 @@ use core::fmt::Write;
 use core::iter::FromIterator;
 
 use heapless::String;
-use libm::{expf, fabsf, log2f, truncf};
+use libm::{expf, fabsf, floorf, log2f, truncf};
 
 mod complex;
 use complex::Complex;
@@ -47,6 +47,16 @@ fn log2_complex_to_color(z: Complex) -> Color {
 fn sigmoid_complex_to_color(z: Complex) -> Color {
     let value = (2. / (1. + expf(-z.modulus()))) - 1.;
     Color::from_hv(z.argument(), value)
+}
+fn chekerboard_complex_to_color(z: Complex) -> Color {
+    Color::from_hv(
+        z.argument(),
+        if fabsf(floorf(z.real)) as u16 % 2 == fabsf(floorf(z.imag)) as u16 % 2 {
+            0.5
+        } else {
+            1.
+        },
+    )
 }
 
 fn plot_rect(state: &State, rect: Rect) {
@@ -154,7 +164,11 @@ enum StateMode {
 fn _eadk_main() {
     let mut func_body = Function::from_slice(&[MathInstruction::Z]);
 
-    let color_modes = [log2_complex_to_color, sigmoid_complex_to_color];
+    let color_modes = [
+        sigmoid_complex_to_color,
+        chekerboard_complex_to_color,
+        log2_complex_to_color,
+    ];
 
     let mut state = State {
         func: FastFunction::from(func_body.clone()),
