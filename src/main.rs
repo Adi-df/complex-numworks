@@ -400,7 +400,14 @@ fn _eadk_main() {
                     Color::WHITE,
                 );
 
-                if keyboard_state.key_down(key::BACKSPACE) {
+                if keyboard_state.key_down(key::SHIFT) && keyboard_state.key_down(key::EXP) {
+                    func_body.push(MathInstruction::E).unwrap();
+                } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::MINUS)
+                {
+                    func_body.push(MathInstruction::Conj).unwrap();
+                } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::XNT) {
+                    func_body.push(MathInstruction::ZConj).unwrap();
+                } else if keyboard_state.key_down(key::BACKSPACE) {
                     func_body.pop();
                 } else if keyboard_state.key_down(key::XNT) {
                     func_body.push(MathInstruction::Z).unwrap();
@@ -408,8 +415,6 @@ fn _eadk_main() {
                     func_body.push(MathInstruction::Imag).unwrap();
                 } else if keyboard_state.key_down(key::PI) {
                     func_body.push(MathInstruction::Pi).unwrap();
-                } else if keyboard_state.key_down(key::SHIFT) && keyboard_state.key_down(key::EXP) {
-                    func_body.push(MathInstruction::E).unwrap();
                 } else if keyboard_state.key_down(key::PLUS) {
                     func_body.push(MathInstruction::Add).unwrap();
                 } else if keyboard_state.key_down(key::MINUS) {

@@ -202,6 +202,11 @@ pub trait Trig {
     fn sin(self) -> Self::Output;
     fn cos(self) -> Self::Output;
 }
+pub trait Conj {
+    type Output;
+
+    fn conj(self) -> Self::Output;
+}
 
 impl Pow<f32> for Complex {
     type Output = Complex;
@@ -276,5 +281,23 @@ impl Trig for f32 {
     }
     fn cos(self) -> f32 {
         cosf(self)
+    }
+}
+
+impl Conj for Complex {
+    type Output = Complex;
+
+    fn conj(self) -> Self::Output {
+        Complex {
+            real: self.real,
+            imag: -self.imag,
+        }
+    }
+}
+impl Conj for f32 {
+    type Output = f32;
+
+    fn conj(self) -> Self::Output {
+        self
     }
 }

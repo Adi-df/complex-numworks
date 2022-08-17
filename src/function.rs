@@ -8,7 +8,7 @@ use core::{
 
 use heapless::{String, Vec};
 
-use crate::complex::{Complex, Exp, Log, Pow, Trig};
+use crate::complex::{Complex, Conj, Exp, Log, Pow, Trig};
 
 pub const FUNCTION_SIZE: usize = 255;
 pub const FUNCTION_STRING_SIZE: usize = FUNCTION_SIZE * 8;
@@ -26,7 +26,10 @@ pub type StringFunction = String<FUNCTION_STRING_SIZE>;
 #[derive(Clone, Debug)]
 pub enum MathInstruction {
     Z,
+    ZConj,
     Number(f32),
+
+    Conj,
 
     Imag,
     Pi,
@@ -50,7 +53,9 @@ pub enum MathInstruction {
 #[derive(Clone, Debug)]
 pub enum FastMathInstr {
     Z,
+    ZConj,
     Number(Complex),
+    Conj,
 
     Add(Complex),
     Sub(Complex),
@@ -93,7 +98,9 @@ impl Display for MathInstruction {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             MathInstruction::Z => write!(f, "Z"),
+            MathInstruction::ZConj => write!(f, "Z*"),
             MathInstruction::Number(x) => write!(f, "{}", x),
+            MathInstruction::Conj => write!(f, "_"),
 
             MathInstruction::Imag => write!(f, "i"),
             MathInstruction::Pi => write!(f, "pi"),
@@ -192,7 +199,12 @@ impl Evaluate for Function {
         for instr in self.iter() {
             match instr {
                 MathInstruction::Z => stack.push(z).unwrap(),
+                MathInstruction::ZConj => stack.push(z.conj()).unwrap(),
                 MathInstruction::Number(x) => stack.push(Complex::from_real(*x)).unwrap(),
+                MathInstruction::Conj => {
+                    let c = stack.pop().unwrap();
+                    stack.push(c.conj()).unwrap();
+                }
 
                 MathInstruction::Imag => {
                     let c = stack.pop().unwrap();
@@ -258,6 +270,8 @@ impl Evaluate for Function {
 
 impl Evaluate for FastFunction {
     fn eval(&self, z: Complex) -> Complex {
+        let zconj = z.conj();
+
         let mut stack: [Complex; 32] = [Complex::ZERO; 32];
         let mut stack_pointer = 0;
 
@@ -267,9 +281,16 @@ impl Evaluate for FastFunction {
                     stack_pointer += 1;
                     stack[stack_pointer] = z;
                 }
+                FastMathInstr::ZConj => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = zconj;
+                }
                 FastMathInstr::Number(c) => {
                     stack_pointer += 1;
                     stack[stack_pointer] = *c;
+                }
+                FastMathInstr::Conj => {
+                    stack[stack_pointer] = stack[stack_pointer].conj();
                 }
 
                 FastMathInstr::Add(c) => {
@@ -395,6 +416,7 @@ impl From<Function> for FastFunction {
             while let Some(instr) = iter.next() {
                 out.push(match *instr {
                     MathInstruction::Z => FastMathInstr::Z,
+                    MathInstruction::ZConj => FastMathInstr::ZConj,
                     MathInstruction::Number(x) => {
                         if let Some(MathInstruction::Imag) = iter.peek() {
                             iter.next().unwrap();
@@ -403,6 +425,7 @@ impl From<Function> for FastFunction {
                             FastMathInstr::Number(Complex::from_real(x))
                         }
                     }
+                    MathInstruction::Conj => FastMathInstr::Conj,
 
                     MathInstruction::Pi => FastMathInstr::Number(Complex::from_real(PI)),
                     MathInstruction::E => FastMathInstr::Number(Complex::from_real(E)),
@@ -536,6 +559,11 @@ impl From<Function> for FastFunction {
                         FastMathInstr::Number(c) => {
                             if let Some(n_instr) = iter.peek() {
                                 match **n_instr {
+                                    FastMathInstr::Conj => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(c.conj())
+                                    }
+
                                     FastMathInstr::Add(c2) => {
                                         iter.next().unwrap();
                                         FastMathInstr::Number(c + c2)
