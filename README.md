@@ -1,3 +1,5 @@
+![App icon](/src/icon.png "App icon")
+
 # Complex Numworks
 A (terrible) complex function plotter for the numworks calculator.
 
