@@ -15,7 +15,7 @@ jobs:
       - name: Install cargo-make
         uses: davidB/rust-cargo-make@v1
       - name: Install nwlink
-        run: npm install -g nwlink
+        run: npm install --location=global nwlink
       - name: Run cargo build
         uses: actions-rs/cargo@v1
         with:
