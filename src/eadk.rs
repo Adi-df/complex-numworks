@@ -260,10 +260,24 @@ extern "C" {
     fn eadk_random() -> u32;
 }
 
+use core::fmt::Write;
 use core::panic::PanicInfo;
 
+use heapless::String;
+
 #[panic_handler]
-fn panic(_: &PanicInfo<'_>) -> ! {
+fn panic(info: &PanicInfo<'_>) -> ! {
+    let mut panic_str: String<64> = String::new();
+    if let Some(location) = info.location() {
+        write!(
+            &mut panic_str,
+            "Error\nin {}\nline {}\0",
+            location.file(),
+            location.line()
+        )
+        .unwrap();
+    }
+
     display::push_rect_uniform(
         Rect {
             x: 0,
@@ -274,8 +288,8 @@ fn panic(_: &PanicInfo<'_>) -> ! {
         Color::RED,
     );
     display::draw_string(
-        "Error !\0",
-        Point::new(10, 10),
+        &panic_str,
+        Point::new(0, 0),
         true,
         Color::BLACK,
         Color::WHITE,
