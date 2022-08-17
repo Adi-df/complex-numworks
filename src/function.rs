@@ -41,6 +41,8 @@ pub enum MathInstruction {
     Exp,
     Log,
 
+    Sqrt,
+
     Sin,
     Cos,
 }
@@ -108,6 +110,8 @@ impl Display for MathInstruction {
 
             MathInstruction::Sin => write!(f, "sin"),
             MathInstruction::Cos => write!(f, "cos"),
+
+            MathInstruction::Sqrt => write!(f, "sqrt"),
         }
     }
 }
@@ -239,6 +243,11 @@ impl Evaluate for Function {
                 MathInstruction::Cos => {
                     let c = stack.pop().unwrap();
                     stack.push(c.cos()).unwrap();
+                }
+
+                MathInstruction::Sqrt => {
+                    let c = stack.pop().unwrap();
+                    stack.push(c.pow(0.5)).unwrap();
                 }
             }
         }
@@ -411,6 +420,8 @@ impl From<Function> for FastFunction {
 
                     MathInstruction::Sin => FastMathInstr::Sin,
                     MathInstruction::Cos => FastMathInstr::Cos,
+
+                    MathInstruction::Sqrt => FastMathInstr::PowR(0.5),
                 })
                 .unwrap();
             }

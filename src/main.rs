@@ -431,6 +431,8 @@ fn _eadk_main() {
                 } else if keyboard_state.key_down(key::SQUARE) {
                     func_body.push(MathInstruction::Number(2.)).unwrap();
                     func_body.push(MathInstruction::Pow).unwrap();
+                } else if keyboard_state.key_down(key::SQRT) {
+                    func_body.push(MathInstruction::Sqrt).unwrap();
                 } else if number_pressed {
                     let mut num: String<32> = String::new();
                     loop {
