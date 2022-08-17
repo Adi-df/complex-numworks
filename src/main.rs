@@ -154,11 +154,7 @@ enum StateMode {
 fn _eadk_main() {
     let mut func_body = Function::from_slice(&[MathInstruction::Z]);
 
-    let color_modes = [
-        log2_complex_to_color,
-        // log10_complex_to_color,
-        sigmoid_complex_to_color,
-    ];
+    let color_modes = [log2_complex_to_color, sigmoid_complex_to_color];
 
     let mut state = State {
         func: FastFunction::from(func_body.clone()),

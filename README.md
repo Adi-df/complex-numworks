@@ -24,11 +24,14 @@ Return to default mode by using the BACK key.
 Use the TOOLBOX key to change the function:  
 **IT'S A [RPN](https://en.wikipedia.org/wiki/Reverse_Polish_notation) NOTATION**
 
-To enter a **real** number, press any digit and type your number then press EXE.  
+To enter a **real** number, press any digit and type your number then press EXE. Use - to switch number sign.  
 For a complex one, just enter a real, use the I key and then just add another real as usual.  
 
+The conjugate a number, use ALPHA + MINUS. And to get z conjugate, just use ALPHA + XNT.  
+
 Parenthesis aren't implemented as there's no need for it in RPN.\
-Square root, Tangent, log10 and inverse trig function are still not implemented.
+The Log key mean log base a:
+`z 2 log = log2(z)`
 
 ## Why using it?
 Despair.
