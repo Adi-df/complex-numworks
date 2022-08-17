@@ -15,8 +15,10 @@ And Home key to exit.
 
 Press Alpha and
  - E to make the axes equal
- - S to activate/desactivate level lines
  - G to go to a specific value
+ - S to use sigmoid style
+ - R to use log2 style
+ - T to use checkerboard style
 
 Use the VAR key to enter value mode where a white dot moveable using the arrow keys display the values of `z` and `f(z)`.
 Return to default mode by using the BACK key.

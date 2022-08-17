@@ -48,7 +48,7 @@ fn sigmoid_complex_to_color(z: Complex) -> Color {
     let value = (2. / (1. + expf(-z.modulus()))) - 1.;
     Color::from_hv(z.argument(), value)
 }
-fn chekerboard_complex_to_color(z: Complex) -> Color {
+fn checkerboard_complex_to_color(z: Complex) -> Color {
     Color::from_hv(
         z.argument(),
         if fabsf(floorf(z.real)) as u16 % 2 == fabsf(floorf(z.imag)) as u16 % 2 {
@@ -164,12 +164,6 @@ enum StateMode {
 fn _eadk_main() {
     let mut func_body = Function::from_slice(&[MathInstruction::Z]);
 
-    let color_modes = [
-        sigmoid_complex_to_color,
-        chekerboard_complex_to_color,
-        log2_complex_to_color,
-    ];
-
     let mut state = State {
         func: FastFunction::from(func_body.clone()),
         area: ComplexRect {
@@ -244,14 +238,25 @@ fn _eadk_main() {
                     plot_func(&state);
                 }
                 // Style
-                else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::FIVE)
+                else if keyboard_state.key_down(key::ALPHA)
+                    && keyboard_state.key_down(key::FIVE)
+                    && state.color_mode != sigmoid_complex_to_color
                 {
-                    state.color_mode = color_modes[(color_modes
-                        .iter()
-                        .position(|mode| *mode == state.color_mode)
-                        .unwrap_or(0)
-                        + 1)
-                        % color_modes.len()];
+                    state.color_mode = sigmoid_complex_to_color;
+
+                    plot_func(&state);
+                } else if keyboard_state.key_down(key::ALPHA)
+                    && keyboard_state.key_down(key::FOUR)
+                    && state.color_mode != checkerboard_complex_to_color
+                {
+                    state.color_mode = checkerboard_complex_to_color;
+
+                    plot_func(&state);
+                } else if keyboard_state.key_down(key::ALPHA)
+                    && keyboard_state.key_down(key::SIX)
+                    && state.color_mode != log2_complex_to_color
+                {
+                    state.color_mode = log2_complex_to_color;
 
                     plot_func(&state);
                 }
