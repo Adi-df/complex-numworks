@@ -6,7 +6,7 @@ Poorly written.
 Working (Kind of...)
 
 ## How to install
-Use the [Numwroks online uploader](https://my.numworks.com/apps) with the app.nwa in the build directory.
+Use the [Numwroks online uploader](https://my.numworks.com/apps) with the complex-numworks.nwa in the build directory.
 
 ## How to use
 By default, values from -10-10i to 10+10i are plotted  
