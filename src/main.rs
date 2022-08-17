@@ -8,6 +8,7 @@ use eadk::{
 };
 
 use core::fmt::Write;
+use core::iter::FromIterator;
 
 use heapless::String;
 use libm::{expf, fabsf, log2f, truncf};
@@ -115,8 +116,13 @@ fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
         num.push('9').unwrap();
     } else if keyboard_state.key_down(key::DOT) {
         num.push('.').unwrap();
-    } else if keyboard_state.key_down(key::BACKSPACE) {
-        num.pop();
+    } else if keyboard_state.key_down(key::MINUS) {
+        match num.chars().nth(0) {
+            Some('-') => *num = <String<N>>::from_iter(num.chars().skip(1)),
+            None | Some(_) => *num = <String<N>>::from_iter(num.chars().rev().chain(['-']).rev()),
+        }
+    } else if keyboard_state.key_down(key::BACKSPACE) && num.len() > 0 {
+        num.pop().unwrap();
     } else if keyboard_state.key_down(key::EXE) {
         return Some(num.parse().unwrap());
     }
