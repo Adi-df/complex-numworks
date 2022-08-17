@@ -48,6 +48,7 @@ pub enum MathInstruction {
 
     Sin,
     Cos,
+    Tan,
 }
 
 #[derive(Clone, Debug)]
@@ -89,9 +90,11 @@ pub enum FastMathInstr {
 
     SinZ,
     CosZ,
+    TanZ,
 
     Sin,
     Cos,
+    Tan,
 }
 
 impl Display for MathInstruction {
@@ -117,6 +120,7 @@ impl Display for MathInstruction {
 
             MathInstruction::Sin => write!(f, "sin"),
             MathInstruction::Cos => write!(f, "cos"),
+            MathInstruction::Tan => write!(f, "tan"),
 
             MathInstruction::Sqrt => write!(f, "sqrt"),
         }
@@ -256,6 +260,10 @@ impl Evaluate for Function {
                     let c = stack.pop().unwrap();
                     stack.push(c.cos()).unwrap();
                 }
+                MathInstruction::Tan => {
+                    let c = stack.pop().unwrap();
+                    stack.push(c.tan()).unwrap();
+                }
 
                 MathInstruction::Sqrt => {
                     let c = stack.pop().unwrap();
@@ -270,8 +278,6 @@ impl Evaluate for Function {
 
 impl Evaluate for FastFunction {
     fn eval(&self, z: Complex) -> Complex {
-        let zconj = z.conj();
-
         let mut stack: [Complex; 32] = [Complex::ZERO; 32];
         let mut stack_pointer = 0;
 
@@ -283,7 +289,7 @@ impl Evaluate for FastFunction {
                 }
                 FastMathInstr::ZConj => {
                     stack_pointer += 1;
-                    stack[stack_pointer] = zconj;
+                    stack[stack_pointer] = z.conj();
                 }
                 FastMathInstr::Number(c) => {
                     stack_pointer += 1;
@@ -384,6 +390,9 @@ impl Evaluate for FastFunction {
                 FastMathInstr::Cos => {
                     stack[stack_pointer] = stack[stack_pointer].cos();
                 }
+                FastMathInstr::Tan => {
+                    stack[stack_pointer] = stack[stack_pointer].tan();
+                }
 
                 FastMathInstr::SinZ => {
                     stack_pointer += 1;
@@ -392,6 +401,10 @@ impl Evaluate for FastFunction {
                 FastMathInstr::CosZ => {
                     stack_pointer += 1;
                     stack[stack_pointer] = z.cos();
+                }
+                FastMathInstr::TanZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.tan();
                 }
             }
         }
@@ -443,6 +456,7 @@ impl From<Function> for FastFunction {
 
                     MathInstruction::Sin => FastMathInstr::Sin,
                     MathInstruction::Cos => FastMathInstr::Cos,
+                    MathInstruction::Tan => FastMathInstr::Tan,
 
                     MathInstruction::Sqrt => FastMathInstr::PowR(0.5),
                 })
@@ -503,6 +517,10 @@ impl From<Function> for FastFunction {
                                     FastMathInstr::Cos => {
                                         iter.next().unwrap();
                                         FastMathInstr::CosZ
+                                    }
+                                    FastMathInstr::Tan => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::TanZ
                                     }
 
                                     _ => FastMathInstr::Z,
@@ -601,6 +619,10 @@ impl From<Function> for FastFunction {
                                     FastMathInstr::Cos => {
                                         iter.next().unwrap();
                                         FastMathInstr::Number(c.cos())
+                                    }
+                                    FastMathInstr::Tan => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(c.tan())
                                     }
 
                                     _ => FastMathInstr::Number(c),

@@ -433,6 +433,8 @@ fn _eadk_main() {
                     func_body.push(MathInstruction::Sin).unwrap();
                 } else if keyboard_state.key_down(key::COSINE) {
                     func_body.push(MathInstruction::Cos).unwrap();
+                } else if keyboard_state.key_down(key::TANGENT) {
+                    func_body.push(MathInstruction::Tan).unwrap();
                 } else if keyboard_state.key_down(key::SQUARE) {
                     func_body.push(MathInstruction::Number(2.)).unwrap();
                     func_body.push(MathInstruction::Pow).unwrap();

@@ -2,7 +2,7 @@ use core::f32::consts::PI;
 use core::fmt::Display;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use libm::{atan2f, cosf, expf, sinf};
+use libm::{atan2f, cosf, expf, sinf, tanf};
 use libm::{logf, sqrtf};
 
 #[derive(Debug, Clone, Copy)]
@@ -19,6 +19,7 @@ impl Display for Complex {
 
 impl Complex {
     pub const ZERO: Complex = Complex { real: 0., imag: 0. };
+    pub const I: Complex = Complex { real: 0., imag: 1. };
 
     pub fn from_real(real: f32) -> Self {
         Complex { real, imag: 0. }
@@ -201,6 +202,7 @@ pub trait Trig {
 
     fn sin(self) -> Self::Output;
     fn cos(self) -> Self::Output;
+    fn tan(self) -> Self::Output;
 }
 pub trait Conj {
     type Output;
@@ -272,6 +274,11 @@ impl Trig for Complex {
             imag: sinf(self.real) * (expf(-self.imag) - expf(self.imag)) / 2.,
         }
     }
+    fn tan(self) -> Complex {
+        let eiz = (Complex::I * self).exp();
+        let emiz = (-Complex::I * self).exp();
+        -Complex::I * (eiz - emiz) / (eiz + emiz)
+    }
 }
 impl Trig for f32 {
     type Output = f32;
@@ -281,6 +288,9 @@ impl Trig for f32 {
     }
     fn cos(self) -> f32 {
         cosf(self)
+    }
+    fn tan(self) -> f32 {
+        tanf(self)
     }
 }
 
