@@ -2,8 +2,7 @@ use core::f32::consts::PI;
 use core::fmt::Display;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use libm::{atan2f, cosf, expf, sinf, tanf};
-use libm::{logf, sqrtf};
+use libm::{atan2f, cosf, expf, fabsf, logf, sinf, sqrtf, tanf};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Complex {
@@ -253,9 +252,12 @@ impl Log for Complex {
     }
 }
 impl Log for f32 {
-    type Output = f32;
-    fn log(self) -> f32 {
-        logf(self)
+    type Output = Complex;
+    fn log(self) -> Complex {
+        Complex {
+            imag: if self < 0. { PI } else { 0. },
+            real: logf(fabsf(self)),
+        }
     }
 }
 
