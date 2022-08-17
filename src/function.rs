@@ -8,7 +8,7 @@ use core::{
 
 use heapless::{String, Vec};
 
-use crate::complex::{Complex, Conj, Exp, Log, Pow, Trig};
+use crate::complex::{Complex, Conj, Exp, InverseTrig, Log, Pow, Trig};
 
 pub const FUNCTION_SIZE: usize = 255;
 pub const FUNCTION_STRING_SIZE: usize = FUNCTION_SIZE * 8;
@@ -41,15 +41,19 @@ pub enum MathInstruction {
     Div,
     Pow,
 
+    Sqrt,
+
     Exp,
     Ln,
     Log,
 
-    Sqrt,
-
     Sin,
     Cos,
     Tan,
+
+    Arcsin,
+    Arccos,
+    Arctan,
 }
 
 #[derive(Clone, Debug)]
@@ -101,6 +105,14 @@ pub enum FastMathInstr {
     Sin,
     Cos,
     Tan,
+
+    ArcsinZ,
+    ArccosZ,
+    ArctanZ,
+
+    Arcsin,
+    Arccos,
+    Arctan,
 }
 
 impl Display for MathInstruction {
@@ -121,6 +133,8 @@ impl Display for MathInstruction {
             MathInstruction::Div => write!(f, "/"),
             MathInstruction::Pow => write!(f, "^"),
 
+            MathInstruction::Sqrt => write!(f, "sqrt"),
+
             MathInstruction::Exp => write!(f, "e^"),
             MathInstruction::Ln => write!(f, "ln"),
 
@@ -130,7 +144,9 @@ impl Display for MathInstruction {
             MathInstruction::Cos => write!(f, "cos"),
             MathInstruction::Tan => write!(f, "tan"),
 
-            MathInstruction::Sqrt => write!(f, "sqrt"),
+            MathInstruction::Arcsin => write!(f, "arcsin"),
+            MathInstruction::Arccos => write!(f, "arccos"),
+            MathInstruction::Arctan => write!(f, "arctan"),
         }
     }
 }
@@ -251,6 +267,11 @@ impl Evaluate for Function {
                     stack.push(c.pow(exponent)).unwrap();
                 }
 
+                MathInstruction::Sqrt => {
+                    let c = stack.pop().unwrap();
+                    stack.push(c.pow(0.5)).unwrap();
+                }
+
                 MathInstruction::Exp => {
                     let c = stack.pop().unwrap();
                     stack.push(c.exp()).unwrap();
@@ -279,9 +300,17 @@ impl Evaluate for Function {
                     stack.push(c.tan()).unwrap();
                 }
 
-                MathInstruction::Sqrt => {
+                MathInstruction::Arcsin => {
                     let c = stack.pop().unwrap();
-                    stack.push(c.pow(0.5)).unwrap();
+                    stack.push(c.arcsin()).unwrap();
+                }
+                MathInstruction::Arccos => {
+                    let c = stack.pop().unwrap();
+                    stack.push(c.arccos()).unwrap();
+                }
+                MathInstruction::Arctan => {
+                    let c = stack.pop().unwrap();
+                    stack.push(c.arctan()).unwrap();
                 }
             }
         }
@@ -435,6 +464,29 @@ impl Evaluate for FastFunction {
                     stack_pointer += 1;
                     stack[stack_pointer] = z.tan();
                 }
+
+                FastMathInstr::Arcsin => {
+                    stack[stack_pointer] = stack[stack_pointer].arcsin();
+                }
+                FastMathInstr::Arccos => {
+                    stack[stack_pointer] = stack[stack_pointer].arccos();
+                }
+                FastMathInstr::Arctan => {
+                    stack[stack_pointer] = stack[stack_pointer].arctan();
+                }
+
+                FastMathInstr::ArcsinZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.arcsin();
+                }
+                FastMathInstr::ArccosZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.arccos();
+                }
+                FastMathInstr::ArctanZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.arctan();
+                }
             }
         }
 
@@ -480,6 +532,8 @@ impl From<Function> for FastFunction {
                     MathInstruction::Div => FastMathInstr::DivS,
                     MathInstruction::Pow => FastMathInstr::PowS,
 
+                    MathInstruction::Sqrt => FastMathInstr::PowR(0.5),
+
                     MathInstruction::Exp => FastMathInstr::Exp,
                     MathInstruction::Ln => FastMathInstr::Ln,
 
@@ -489,7 +543,9 @@ impl From<Function> for FastFunction {
                     MathInstruction::Cos => FastMathInstr::Cos,
                     MathInstruction::Tan => FastMathInstr::Tan,
 
-                    MathInstruction::Sqrt => FastMathInstr::PowR(0.5),
+                    MathInstruction::Arcsin => FastMathInstr::Arcsin,
+                    MathInstruction::Arccos => FastMathInstr::Arccos,
+                    MathInstruction::Arctan => FastMathInstr::Arctan,
                 })
                 .unwrap();
             }
@@ -557,6 +613,19 @@ impl From<Function> for FastFunction {
                                     FastMathInstr::Tan => {
                                         iter.next().unwrap();
                                         FastMathInstr::TanZ
+                                    }
+
+                                    FastMathInstr::Arcsin => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::ArcsinZ
+                                    }
+                                    FastMathInstr::Arccos => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::ArccosZ
+                                    }
+                                    FastMathInstr::Arctan => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::ArctanZ
                                     }
 
                                     _ => FastMathInstr::Z,
@@ -669,6 +738,19 @@ impl From<Function> for FastFunction {
                                     FastMathInstr::Tan => {
                                         iter.next().unwrap();
                                         FastMathInstr::Number(c.tan())
+                                    }
+
+                                    FastMathInstr::Arcsin => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(c.arcsin())
+                                    }
+                                    FastMathInstr::Arccos => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(c.arccos())
+                                    }
+                                    FastMathInstr::Arctan => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(c.arctan())
                                     }
 
                                     _ => FastMathInstr::Number(c),

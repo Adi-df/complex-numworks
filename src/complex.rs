@@ -2,7 +2,7 @@ use core::f32::consts::PI;
 use core::fmt::Display;
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use libm::{atan2f, cosf, expf, fabsf, logf, sinf, sqrtf, tanf};
+use libm::{acosf, asinf, atan2f, atanf, cosf, expf, fabsf, logf, sinf, sqrtf, tanf};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Complex {
@@ -36,12 +36,7 @@ impl Complex {
     }
 
     pub fn argument(&self) -> f32 {
-        let a = atan2f(self.imag, self.real);
-        if a < 0. {
-            a + 2. * PI
-        } else {
-            a
-        }
+        atan2f(self.imag, self.real)
     }
 
     pub fn polar(&self) -> (f32, f32) {
@@ -197,11 +192,18 @@ pub trait Log {
     fn log(self) -> Self::Output;
 }
 pub trait Trig {
-    type Output: Div<Self::Output>;
+    type Output;
 
     fn sin(self) -> Self::Output;
     fn cos(self) -> Self::Output;
     fn tan(self) -> Self::Output;
+}
+pub trait InverseTrig {
+    type Output;
+
+    fn arcsin(self) -> Self::Output;
+    fn arccos(self) -> Self::Output;
+    fn arctan(self) -> Self::Output;
 }
 pub trait Conj {
     type Output;
@@ -293,6 +295,36 @@ impl Trig for f32 {
     }
     fn tan(self) -> f32 {
         tanf(self)
+    }
+}
+
+impl InverseTrig for Complex {
+    type Output = Complex;
+
+    fn arcsin(self) -> Complex {
+        -Complex::I * ((Complex::from_real(1.) - self.pow(2.)).pow(0.5) + Complex::I * self).log()
+    }
+    fn arccos(self) -> Complex {
+        -Complex::I * (Complex::I * (Complex::from_real(1.) - self.pow(2.)).pow(0.5)).log()
+    }
+    fn arctan(self) -> Complex {
+        -Complex::I / 2.
+            * ((Complex::from_real(1.) + Complex::I * self)
+                / (Complex::from_real(1.) - Complex::I * self))
+                .log()
+    }
+}
+impl InverseTrig for f32 {
+    type Output = f32;
+
+    fn arcsin(self) -> f32 {
+        asinf(self)
+    }
+    fn arccos(self) -> f32 {
+        acosf(self)
+    }
+    fn arctan(self) -> f32 {
+        atanf(self)
     }
 }
 

@@ -402,6 +402,17 @@ fn _eadk_main() {
 
                 if keyboard_state.key_down(key::SHIFT) && keyboard_state.key_down(key::EXP) {
                     func_body.push(MathInstruction::E).unwrap();
+                } else if keyboard_state.key_down(key::SHIFT) && keyboard_state.key_down(key::SINE)
+                {
+                    func_body.push(MathInstruction::Arcsin).unwrap();
+                } else if keyboard_state.key_down(key::SHIFT)
+                    && keyboard_state.key_down(key::COSINE)
+                {
+                    func_body.push(MathInstruction::Arccos).unwrap();
+                } else if keyboard_state.key_down(key::SHIFT)
+                    && keyboard_state.key_down(key::TANGENT)
+                {
+                    func_body.push(MathInstruction::Arctan).unwrap();
                 } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::MINUS)
                 {
                     func_body.push(MathInstruction::Conj).unwrap();
