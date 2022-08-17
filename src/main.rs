@@ -428,9 +428,9 @@ fn _eadk_main() {
                 } else if keyboard_state.key_down(key::EXP) {
                     func_body.push(MathInstruction::Exp).unwrap();
                 } else if keyboard_state.key_down(key::LN) {
-                    func_body.push(MathInstruction::Log).unwrap();
+                    func_body.push(MathInstruction::Ln).unwrap();
                 } else if keyboard_state.key_down(key::LOG) {
-                    func_body.push(MathInstruction::LogA).unwrap();
+                    func_body.push(MathInstruction::Log).unwrap();
                 } else if keyboard_state.key_down(key::SINE) {
                     func_body.push(MathInstruction::Sin).unwrap();
                 } else if keyboard_state.key_down(key::COSINE) {

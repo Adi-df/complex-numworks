@@ -42,9 +42,8 @@ pub enum MathInstruction {
     Pow,
 
     Exp,
+    Ln,
     Log,
-
-    LogA,
 
     Sqrt,
 
@@ -85,15 +84,15 @@ pub enum FastMathInstr {
     PowS,
 
     ExpZ,
-    LogZ,
+    LnZ,
 
     Exp,
-    Log,
+    Ln,
 
-    LogA(Complex),
-    LogAR(f32),
-    LogAZ,
-    LogAS,
+    Log(Complex),
+    LogR(f32),
+    LogZ,
+    LogS,
 
     SinZ,
     CosZ,
@@ -123,9 +122,9 @@ impl Display for MathInstruction {
             MathInstruction::Pow => write!(f, "^"),
 
             MathInstruction::Exp => write!(f, "e^"),
-            MathInstruction::Log => write!(f, "ln"),
+            MathInstruction::Ln => write!(f, "ln"),
 
-            MathInstruction::LogA => write!(f, "log"),
+            MathInstruction::Log => write!(f, "log"),
 
             MathInstruction::Sin => write!(f, "sin"),
             MathInstruction::Cos => write!(f, "cos"),
@@ -256,12 +255,12 @@ impl Evaluate for Function {
                     let c = stack.pop().unwrap();
                     stack.push(c.exp()).unwrap();
                 }
-                MathInstruction::Log => {
+                MathInstruction::Ln => {
                     let c = stack.pop().unwrap();
                     stack.push(c.log()).unwrap();
                 }
 
-                MathInstruction::LogA => {
+                MathInstruction::Log => {
                     let base = stack.pop().unwrap();
                     let c = stack.pop().unwrap();
                     stack.push(c.log() / base.log()).unwrap();
@@ -386,7 +385,7 @@ impl Evaluate for FastFunction {
                 FastMathInstr::Exp => {
                     stack[stack_pointer] = stack[stack_pointer].exp();
                 }
-                FastMathInstr::Log => {
+                FastMathInstr::Ln => {
                     stack[stack_pointer] = stack[stack_pointer].log();
                 }
 
@@ -394,21 +393,21 @@ impl Evaluate for FastFunction {
                     stack_pointer += 1;
                     stack[stack_pointer] = z.exp();
                 }
-                FastMathInstr::LogZ => {
+                FastMathInstr::LnZ => {
                     stack_pointer += 1;
                     stack[stack_pointer] = z.log();
                 }
 
-                FastMathInstr::LogA(b) => {
+                FastMathInstr::Log(b) => {
                     stack[stack_pointer] = stack[stack_pointer].log() / *b;
                 }
-                FastMathInstr::LogAR(b) => {
+                FastMathInstr::LogR(b) => {
                     stack[stack_pointer] = stack[stack_pointer].log() / *b;
                 }
-                FastMathInstr::LogAZ => {
+                FastMathInstr::LogZ => {
                     stack[stack_pointer] = stack[stack_pointer].log() / z.log();
                 }
-                FastMathInstr::LogAS => {
+                FastMathInstr::LogS => {
                     stack_pointer -= 1;
                     stack[stack_pointer] =
                         stack[stack_pointer].log() / stack[stack_pointer + 1].log();
@@ -482,9 +481,9 @@ impl From<Function> for FastFunction {
                     MathInstruction::Pow => FastMathInstr::PowS,
 
                     MathInstruction::Exp => FastMathInstr::Exp,
-                    MathInstruction::Log => FastMathInstr::Log,
+                    MathInstruction::Ln => FastMathInstr::Ln,
 
-                    MathInstruction::LogA => FastMathInstr::LogAS,
+                    MathInstruction::Log => FastMathInstr::LogS,
 
                     MathInstruction::Sin => FastMathInstr::Sin,
                     MathInstruction::Cos => FastMathInstr::Cos,
@@ -537,14 +536,14 @@ impl From<Function> for FastFunction {
                                         iter.next().unwrap();
                                         FastMathInstr::ExpZ
                                     }
-                                    FastMathInstr::Log => {
+                                    FastMathInstr::Ln => {
                                         iter.next().unwrap();
-                                        FastMathInstr::LogZ
+                                        FastMathInstr::LnZ
                                     }
 
-                                    FastMathInstr::LogAS => {
+                                    FastMathInstr::LogS => {
                                         iter.next().unwrap();
-                                        FastMathInstr::LogAZ
+                                        FastMathInstr::LogZ
                                     }
 
                                     FastMathInstr::Sin => {
@@ -590,9 +589,9 @@ impl From<Function> for FastFunction {
                                         FastMathInstr::Pow(x)
                                     }
 
-                                    FastMathInstr::LogAS => {
+                                    FastMathInstr::LogS => {
                                         iter.next().unwrap();
-                                        FastMathInstr::LogA(x.log())
+                                        FastMathInstr::Log(x.log())
                                     }
 
                                     _ => FastMathInstr::Number(x),
@@ -649,12 +648,12 @@ impl From<Function> for FastFunction {
                                         iter.next().unwrap();
                                         FastMathInstr::Number(c.exp())
                                     }
-                                    FastMathInstr::Log => {
+                                    FastMathInstr::Ln => {
                                         iter.next().unwrap();
                                         FastMathInstr::Number(c.log())
                                     }
 
-                                    FastMathInstr::LogA(b) => {
+                                    FastMathInstr::Log(b) => {
                                         iter.next().unwrap();
                                         FastMathInstr::Number(c.log() / b)
                                     }
@@ -709,7 +708,7 @@ impl From<Function> for FastFunction {
                     *instr = FastMathInstr::PowR(z.real);
                 }
 
-                FastMathInstr::LogA(z) if z.is_real() => *instr = FastMathInstr::LogAR(z.real),
+                FastMathInstr::Log(z) if z.is_real() => *instr = FastMathInstr::LogR(z.real),
                 _ => {}
             }
         }
