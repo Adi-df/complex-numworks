@@ -108,27 +108,27 @@ fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
     let keyboard_state = keyboard::scan();
 
     if keyboard_state.key_down(key::ZERO) {
-        num.push('0').unwrap();
+        num.push('0').unwrap_or(());
     } else if keyboard_state.key_down(key::ONE) {
-        num.push('1').unwrap();
+        num.push('1').unwrap_or(());
     } else if keyboard_state.key_down(key::TWO) {
-        num.push('2').unwrap();
+        num.push('2').unwrap_or(());
     } else if keyboard_state.key_down(key::THREE) {
-        num.push('3').unwrap();
+        num.push('3').unwrap_or(());
     } else if keyboard_state.key_down(key::FOUR) {
-        num.push('4').unwrap();
+        num.push('4').unwrap_or(());
     } else if keyboard_state.key_down(key::FIVE) {
-        num.push('5').unwrap();
+        num.push('5').unwrap_or(());
     } else if keyboard_state.key_down(key::SIX) {
-        num.push('6').unwrap();
+        num.push('6').unwrap_or(());
     } else if keyboard_state.key_down(key::SEVEN) {
-        num.push('7').unwrap();
+        num.push('7').unwrap_or(());
     } else if keyboard_state.key_down(key::EIGHT) {
-        num.push('8').unwrap();
+        num.push('8').unwrap_or(());
     } else if keyboard_state.key_down(key::NINE) {
-        num.push('9').unwrap();
+        num.push('9').unwrap_or(());
     } else if keyboard_state.key_down(key::DOT) {
-        num.push('.').unwrap();
+        num.push('.').unwrap_or(());
     } else if keyboard_state.key_down(key::MINUS) {
         match num.chars().nth(0) {
             Some('-') => *num = <String<N>>::from_iter(num.chars().skip(1)),
@@ -137,7 +137,7 @@ fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
     } else if keyboard_state.key_down(key::BACKSPACE) && num.len() > 0 {
         num.pop().unwrap();
     } else if keyboard_state.key_down(key::EXE) {
-        return Some(num.parse().unwrap());
+        return Some(num.as_str().parse::<f32>().unwrap());
     }
     None
 }
@@ -313,6 +313,8 @@ fn _eadk_main() {
                                     state.area.from_real = num - x_margin;
                                     state.area.to_real = num + x_margin;
                                     y_selected = true;
+
+                                    while keyboard::scan().key_down(key::EXE) {}
                                 }
                             }
                             true => {
@@ -530,15 +532,15 @@ fn _eadk_main() {
                                 Color::WHITE,
                             );
 
-                            num.push('\0').unwrap();
+                            let mut num_str: String<33> = String::new();
+                            write!(&mut num_str, "{}\0", num).unwrap();
                             display::draw_string(
-                                &num,
+                                &num_str,
                                 Point::ZERO,
                                 false,
                                 Color::BLACK,
                                 Color::WHITE,
                             );
-                            num.pop().unwrap();
 
                             if let Some(num) = keyboard_number(&mut num) {
                                 func_body.push(MathInstruction::Number(num)).unwrap();
