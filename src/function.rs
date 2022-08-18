@@ -509,7 +509,50 @@ pub trait Validate {
 
 impl Validate for Function {
     fn validate(&self) -> Result<(), SyntaxError> {
-        todo!()
+        let mut stack_size: isize = 0;
+
+        for (op_index, instr) in self.into_iter().enumerate() {
+            match instr {
+                MathInstruction::Number(_) => stack_size += 1,
+                MathInstruction::Pi | MathInstruction::E => stack_size += 1,
+                MathInstruction::Z | MathInstruction::ZConj => stack_size += 1,
+
+                MathInstruction::Imag | MathInstruction::Conj if stack_size > 0 => {}
+
+                MathInstruction::Add
+                | MathInstruction::Sub
+                | MathInstruction::Mul
+                | MathInstruction::Div
+                | MathInstruction::Pow => stack_size -= 1,
+
+                MathInstruction::Sqrt => {}
+
+                MathInstruction::Exp | MathInstruction::Ln if stack_size > 0 => {}
+
+                MathInstruction::Log => stack_size -= 1,
+
+                MathInstruction::Sin
+                | MathInstruction::Cos
+                | MathInstruction::Tan
+                | MathInstruction::Arcsin
+                | MathInstruction::Arccos
+                | MathInstruction::Arctan
+                    if stack_size > 0 => {}
+
+                _ => return Err(SyntaxError { op_index }),
+            }
+
+            if stack_size <= 0 {
+                return Err(SyntaxError { op_index });
+            }
+        }
+        if stack_size != 1 {
+            return Err(SyntaxError {
+                op_index: usize::MAX,
+            });
+        }
+
+        Ok(())
     }
 }
 

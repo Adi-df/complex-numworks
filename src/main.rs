@@ -17,7 +17,7 @@ mod complex;
 use complex::Complex;
 
 mod function;
-use function::{Evaluate, FastFunction, Function, MathInstruction, StringFunction};
+use function::{Evaluate, FastFunction, Function, MathInstruction, StringFunction, Validate};
 
 #[export_name = "eadk_app_name"]
 #[link_section = ".rodata.eadk_app_name"]
@@ -534,11 +534,25 @@ fn _eadk_main() {
                         },
                     );
                 } else if keyboard_state.key_down(key::OK) {
-                    state.func = FastFunction::from(func_body.clone());
-                    state.mode = StateMode::Default;
+                    match func_body.validate() {
+                        Ok(()) => {
+                            state.func = FastFunction::from(func_body.clone());
+                            state.mode = StateMode::Default;
 
-                    plot_func(&state);
-                    continue;
+                            plot_func(&state);
+                            continue;
+                        }
+                        Err(_) => {
+                            display::draw_string(
+                                string.as_str(),
+                                Point::new(0, 0),
+                                false,
+                                Color::RED,
+                                Color::WHITE,
+                            );
+                            timing::msleep(400);
+                        }
+                    }
                 }
 
                 timing::msleep(100);
