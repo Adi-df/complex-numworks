@@ -410,6 +410,7 @@ fn _eadk_main() {
             }
             StateMode::FunctionEditor => {
                 let mut max_line_count = 1;
+                let previous_body = func_body.clone();
 
                 loop {
                     let keyboard_state = keyboard::scan();
@@ -548,6 +549,7 @@ fn _eadk_main() {
                             display::wait_for_vblank();
                         }
                     } else if keyboard_state.key_down(key::BACK) {
+                        func_body = previous_body;
                         state.mode = StateMode::Default;
                         plot_rect(
                             &state,
