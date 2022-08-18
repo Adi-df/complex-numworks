@@ -10,7 +10,7 @@ use eadk::{
 use core::fmt::Write;
 use core::iter::FromIterator;
 
-use heapless::String;
+use heapless::{String, Vec};
 use libm::{expf, fabsf, floorf, log2f, truncf};
 
 mod complex;
@@ -30,6 +30,9 @@ pub static EADK_APP_API_LEVEL: u32 = 0;
 #[export_name = "eadk_app_icon"]
 #[link_section = ".rodata.eadk_app_icon"]
 pub static EADK_APP_ICON: [u8; 3477] = *include_bytes!("../target/icon.nwi");
+
+const CHARACTERS_BY_LINE: usize = 45;
+const LINE_HEIGHT_IN_PIXEL: u16 = 14;
 
 fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
     Complex {
@@ -404,17 +407,33 @@ fn _eadk_main() {
                     || keyboard_state.key_down(key::EIGHT)
                     || keyboard_state.key_down(key::NINE);
 
+                let mut line_count = 0;
+                let string: StringFunction = StringFunction::from(func_body.clone())
+                    .chars()
+                    .into_iter()
+                    .enumerate()
+                    .flat_map(|(i, c)| {
+                        if i % CHARACTERS_BY_LINE == 0 {
+                            line_count += 1;
+                            <Vec<char, 2>>::from_slice(&['\n', c]).unwrap()
+                        } else {
+                            <Vec<char, 2>>::from_slice(&[c]).unwrap()
+                        }
+                    })
+                    .skip(1)
+                    .collect();
+
                 display::push_rect_uniform(
                     Rect {
                         x: 0,
                         y: 0,
                         width: SCREEN_WIDTH,
-                        height: 30,
+                        height: line_count * LINE_HEIGHT_IN_PIXEL,
                     },
                     Color::WHITE,
                 );
                 display::draw_string(
-                    StringFunction::from(func_body.clone()).as_str(),
+                    string.as_str(),
                     Point::new(0, 0),
                     false,
                     Color::BLACK,
@@ -507,7 +526,7 @@ fn _eadk_main() {
                             x: 0,
                             y: 0,
                             width: SCREEN_WIDTH,
-                            height: 30,
+                            height: line_count * LINE_HEIGHT_IN_PIXEL,
                         },
                     );
                 } else if keyboard_state.key_down(key::OK) {
