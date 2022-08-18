@@ -294,6 +294,19 @@ fn _eadk_main() {
                             Color::WHITE,
                         );
 
+                        if keyboard::scan().key_down(key::BACK) {
+                            plot_rect(
+                                &state,
+                                Rect {
+                                    x: 0,
+                                    y: 0,
+                                    width: SCREEN_WIDTH,
+                                    height: LINE_HEIGHT_IN_PIXEL * 2,
+                                },
+                            );
+                            break;
+                        }
+
                         match y_selected {
                             false => {
                                 if let Some(num) = keyboard_number(&mut x) {
