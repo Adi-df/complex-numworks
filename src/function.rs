@@ -500,6 +500,19 @@ impl<T: Fn(Complex) -> Complex> Evaluate for T {
     }
 }
 
+pub struct SyntaxError {
+    pub op_index: usize,
+}
+pub trait Validate {
+    fn validate(&self) -> Result<(), SyntaxError>;
+}
+
+impl Validate for Function {
+    fn validate(&self) -> Result<(), SyntaxError> {
+        todo!()
+    }
+}
+
 impl From<Function> for FastFunction {
     fn from(func: Function) -> Self {
         // MathInstr to FastMathInstr && Simplify Number -> Imag to Number

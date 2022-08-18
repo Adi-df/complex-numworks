@@ -436,15 +436,6 @@ fn _eadk_main() {
                     .skip(1)
                     .collect();
 
-                display::push_rect_uniform(
-                    Rect {
-                        x: 0,
-                        y: 0,
-                        width: SCREEN_WIDTH,
-                        height: line_count * LINE_HEIGHT_IN_PIXEL,
-                    },
-                    Color::WHITE,
-                );
                 display::draw_string(
                     string.as_str(),
                     Point::new(0, 0),
@@ -547,10 +538,21 @@ fn _eadk_main() {
                     state.mode = StateMode::Default;
 
                     plot_func(&state);
+                    continue;
                 }
 
                 timing::msleep(100);
                 display::wait_for_vblank();
+
+                display::push_rect_uniform(
+                    Rect {
+                        x: 0,
+                        y: 0,
+                        width: SCREEN_WIDTH,
+                        height: line_count * LINE_HEIGHT_IN_PIXEL,
+                    },
+                    Color::WHITE,
+                );
             }
         }
     }
