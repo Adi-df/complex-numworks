@@ -279,7 +279,7 @@ fn _eadk_main() {
                                 x: 0,
                                 y: 0,
                                 width: SCREEN_WIDTH,
-                                height: 30,
+                                height: LINE_HEIGHT_IN_PIXEL * 2,
                             },
                             Color::WHITE,
                         );
@@ -339,7 +339,7 @@ fn _eadk_main() {
                         x: 0,
                         y: 0,
                         width: SCREEN_WIDTH,
-                        height: 30,
+                        height: LINE_HEIGHT_IN_PIXEL * 2,
                     },
                     Color::WHITE,
                 );
@@ -373,7 +373,7 @@ fn _eadk_main() {
                             x: 0,
                             y: 0,
                             width: SCREEN_WIDTH,
-                            height: 30,
+                            height: LINE_HEIGHT_IN_PIXEL * 2,
                         },
                     );
 
