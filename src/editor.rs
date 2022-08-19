@@ -2,14 +2,16 @@ use core::fmt::Write;
 
 use heapless::String;
 
-use crate::{
-    eadk::{
-        display::{self, SCREEN_WIDTH},
-        key, keyboard, timing, Color, Point, Rect,
-    },
-    function::{FastFunction, MathInstruction, StringFunction, Validate},
-    keyboard_number, plot_func, plot_rect, State, CHARACTERS_BY_LINE, LINE_HEIGHT_IN_PIXEL,
-};
+use crate::eadk::display::{self, SCREEN_WIDTH};
+use crate::eadk::timing;
+use crate::eadk::{key, keyboard};
+use crate::eadk::{Color, Point, Rect};
+
+use crate::function::{FastFunction, MathInstruction, StringFunction, Validate};
+
+use crate::utils::keyboard_number;
+
+use crate::{plot_func, plot_rect, State, CHARACTERS_BY_LINE, LINE_HEIGHT_IN_PIXEL};
 
 pub fn editor(state: &mut State) {
     let mut max_line_count = 1;
