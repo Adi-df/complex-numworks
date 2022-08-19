@@ -127,12 +127,12 @@ pub fn editor(state: &mut State) {
                         width: SCREEN_WIDTH,
                         height: LINE_HEIGHT_IN_PIXEL,
                     },
-                    Color::WHITE,
+                    Color::BLACK,
                 );
 
                 let mut num_str: String<33> = String::new();
                 write!(&mut num_str, "{}\0", num).unwrap();
-                display::draw_string(&num_str, Point::ZERO, false, Color::BLACK, Color::WHITE);
+                display::draw_string(&num_str, Point::ZERO, false, Color::WHITE, Color::BLACK);
 
                 if let Some(num) = keyboard_number(&mut num) {
                     state.func_body.push(MathInstruction::Number(num)).unwrap();
