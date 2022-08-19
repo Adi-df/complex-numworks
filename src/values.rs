@@ -42,7 +42,7 @@ pub fn values(state: &mut State) {
                 width: 1,
                 height: 1,
             },
-            (state.color_mode)(fz),
+            (state.color_mode.mapper())(fz),
         );
 
         if keyboard_state.key_down(key::RIGHT) {
@@ -57,7 +57,7 @@ pub fn values(state: &mut State) {
             y += 1;
         } else if keyboard_state.key_down(key::BACK) {
             plot_rect(
-                &state,
+                state,
                 Rect {
                     x: 0,
                     y: 0,

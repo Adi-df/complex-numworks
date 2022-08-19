@@ -10,6 +10,8 @@ use crate::function::Evaluate;
 use crate::State;
 
 pub fn plot_rect(state: &State, rect: Rect) {
+    let color_mapper = state.color_mode.mapper();
+
     let mut row: [Color; SCREEN_WIDTH as usize] = [Color::BLACK; SCREEN_WIDTH as usize];
     (rect.y..rect.height).for_each(|y| {
         let imag = (1. - y as f32 / SCREEN_HEIGHT as f32)
@@ -20,12 +22,12 @@ pub fn plot_rect(state: &State, rect: Rect) {
             .iter_mut()
             .enumerate()
             .for_each(move |(x, p)| {
-                *p = (state.color_mode)(state.func.eval(Complex {
+                *p = color_mapper(state.func.eval(Complex {
                     real: (x as f32 / SCREEN_WIDTH as f32)
                         * (state.area.to_real - state.area.from_real)
                         + state.area.from_real,
                     imag,
-                }))
+                }));
             });
         display::push_rect(
             Rect {
@@ -52,7 +54,23 @@ pub fn plot_func(state: &State) {
 }
 
 pub mod complex_to_color {
-    use super::*;
+    use super::{expf, fabsf, floorf, log2f, truncf, Color, Complex};
+
+    #[derive(PartialEq, Eq, Clone, Copy)]
+    pub enum ColorMapper {
+        Sigmoid,
+        Log2,
+        Checkerboard,
+    }
+    impl ColorMapper {
+        pub fn mapper(self) -> fn(Complex) -> Color {
+            match self {
+                ColorMapper::Sigmoid => sigmoid,
+                ColorMapper::Log2 => log2,
+                ColorMapper::Checkerboard => checkerboard,
+            }
+        }
+    }
 
     pub fn log2(z: Complex) -> Color {
         let value = fabsf(log2f(z.modulus()));

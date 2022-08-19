@@ -513,31 +513,31 @@ impl Validate for Function {
 
         for (op_index, instr) in self.into_iter().enumerate() {
             match instr {
-                MathInstruction::Number(_) => stack_size += 1,
-                MathInstruction::Pi | MathInstruction::E => stack_size += 1,
-                MathInstruction::Z | MathInstruction::ZConj => stack_size += 1,
+                MathInstruction::Number(_)
+                | MathInstruction::Pi
+                | MathInstruction::E
+                | MathInstruction::Z
+                | MathInstruction::ZConj => stack_size += 1,
 
-                MathInstruction::Imag | MathInstruction::Conj if stack_size > 0 => {}
-
-                MathInstruction::Add
-                | MathInstruction::Sub
-                | MathInstruction::Mul
-                | MathInstruction::Div
-                | MathInstruction::Pow => stack_size -= 1,
-
-                MathInstruction::Sqrt => {}
-
-                MathInstruction::Exp | MathInstruction::Ln if stack_size > 0 => {}
-
-                MathInstruction::Log => stack_size -= 1,
-
-                MathInstruction::Sin
+                MathInstruction::Imag
+                | MathInstruction::Conj
+                | MathInstruction::Sqrt
+                | MathInstruction::Exp
+                | MathInstruction::Ln
+                | MathInstruction::Sin
                 | MathInstruction::Cos
                 | MathInstruction::Tan
                 | MathInstruction::Arcsin
                 | MathInstruction::Arccos
                 | MathInstruction::Arctan
                     if stack_size > 0 => {}
+
+                MathInstruction::Add
+                | MathInstruction::Sub
+                | MathInstruction::Mul
+                | MathInstruction::Div
+                | MathInstruction::Pow
+                | MathInstruction::Log => stack_size -= 1,
 
                 _ => return Err(SyntaxError { op_index }),
             }

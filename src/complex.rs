@@ -35,23 +35,23 @@ impl Complex {
         Complex { real: 0., imag }
     }
 
-    pub fn squared_modulus(&self) -> f32 {
+    pub fn squared_modulus(self) -> f32 {
         self.real * self.real + self.imag * self.imag
     }
 
-    pub fn modulus(&self) -> f32 {
+    pub fn modulus(self) -> f32 {
         sqrtf(self.squared_modulus())
     }
 
-    pub fn argument(&self) -> f32 {
+    pub fn argument(self) -> f32 {
         atan2f(self.imag, self.real)
     }
 
-    pub fn polar(&self) -> (f32, f32) {
+    pub fn polar(self) -> (f32, f32) {
         (self.argument(), self.modulus())
     }
 
-    pub fn is_real(&self) -> bool {
+    pub fn is_real(self) -> bool {
         self.imag == 0.
     }
 }
@@ -287,9 +287,9 @@ impl Trig for Complex {
         }
     }
     fn tan(self) -> Complex {
-        let eiz = (Complex::I * self).exp();
-        let emiz = (-Complex::I * self).exp();
-        -Complex::I * (eiz - emiz) / (eiz + emiz)
+        let exp_iz = (Complex::I * self).exp();
+        let exp_minus_iz = (-Complex::I * self).exp();
+        -Complex::I * (exp_iz - exp_minus_iz) / (exp_iz + exp_minus_iz)
     }
 }
 impl Trig for f32 {

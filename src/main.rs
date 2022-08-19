@@ -4,18 +4,18 @@ pub mod eadk;
 
 use eadk::{
     display::{SCREEN_HEIGHT, SCREEN_WIDTH},
-    key, keyboard, Color,
+    key, keyboard,
 };
 
 mod complex;
-use complex::{Complex, ComplexRect};
+use complex::ComplexRect;
 
 mod function;
 use function::{FastFunction, Function, MathInstruction};
 
 mod plot;
 mod utils;
-use plot::complex_to_color;
+use plot::complex_to_color::ColorMapper;
 use plot::plot_func;
 
 mod editor;
@@ -41,7 +41,7 @@ pub struct State {
     func: FastFunction,
     func_body: Function,
     area: ComplexRect,
-    color_mode: fn(Complex) -> Color,
+    color_mode: ColorMapper,
 }
 
 #[no_mangle]
@@ -57,7 +57,7 @@ fn _eadk_main() {
                 from_imag: -7.5,
                 to_imag: 7.5,
             },
-            color_mode: complex_to_color::sigmoid,
+            color_mode: ColorMapper::Sigmoid,
         }
     };
 
@@ -122,23 +122,23 @@ fn _eadk_main() {
         // Style
         else if keyboard_state.key_down(key::ALPHA)
             && keyboard_state.key_down(key::FIVE)
-            && state.color_mode != complex_to_color::sigmoid
+            && state.color_mode != ColorMapper::Sigmoid
         {
-            state.color_mode = complex_to_color::sigmoid;
+            state.color_mode = ColorMapper::Sigmoid;
 
             plot_func(&state);
         } else if keyboard_state.key_down(key::ALPHA)
             && keyboard_state.key_down(key::FOUR)
-            && state.color_mode != complex_to_color::checkerboard
+            && state.color_mode != ColorMapper::Checkerboard
         {
-            state.color_mode = complex_to_color::checkerboard;
+            state.color_mode = ColorMapper::Checkerboard;
 
             plot_func(&state);
         } else if keyboard_state.key_down(key::ALPHA)
             && keyboard_state.key_down(key::SIX)
-            && state.color_mode != complex_to_color::log2
+            && state.color_mode != ColorMapper::Log2
         {
-            state.color_mode = complex_to_color::log2;
+            state.color_mode = ColorMapper::Log2;
 
             plot_func(&state);
         }

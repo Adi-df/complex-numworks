@@ -1,5 +1,3 @@
-use core::iter::FromIterator;
-
 use heapless::String;
 
 use crate::eadk::display::{SCREEN_HEIGHT, SCREEN_WIDTH};
@@ -42,9 +40,9 @@ pub fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
     } else if keyboard_state.key_down(key::DOT) {
         num.push('.').unwrap_or(());
     } else if keyboard_state.key_down(key::MINUS) {
-        match num.chars().nth(0) {
-            Some('-') => *num = <String<N>>::from_iter(num.chars().skip(1)),
-            None | Some(_) => *num = <String<N>>::from_iter(num.chars().rev().chain(['-']).rev()),
+        match num.chars().next() {
+            Some('-') => *num = num.chars().skip(1).collect(),
+            None | Some(_) => *num = num.chars().rev().chain(['-']).rev().collect(),
         }
     } else if keyboard_state.key_down(key::BACKSPACE) && num.len() > 0 {
         num.pop().unwrap();

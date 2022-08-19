@@ -7,7 +7,7 @@ use crate::eadk::timing;
 use crate::eadk::{key, keyboard};
 use crate::eadk::{Color, Point, Rect};
 
-use crate::function::{FastFunction, MathInstruction, StringFunction, Validate};
+use crate::function::{FastFunction, MathInstruction, StringFunction, SyntaxError, Validate};
 
 use crate::plot::{plot_func, plot_rect};
 use crate::utils::keyboard_number;
@@ -141,7 +141,7 @@ pub fn editor(state: &mut State) {
         } else if keyboard_state.key_down(key::BACK) {
             state.func_body = previous_body;
             plot_rect(
-                &state,
+                state,
                 Rect {
                     x: 0,
                     y: 0,
@@ -151,23 +151,20 @@ pub fn editor(state: &mut State) {
             );
             break;
         } else if keyboard_state.key_down(key::OK) {
-            match state.func_body.validate() {
-                Ok(()) => {
-                    state.func = FastFunction::from(state.func_body.clone());
+            if let Err(SyntaxError { op_index: _index }) = state.func_body.validate() {
+                display::draw_string(
+                    string.as_str(),
+                    Point::new(0, 0),
+                    false,
+                    Color::RED,
+                    Color::WHITE,
+                );
+            } else {
+                timing::msleep(400);
+                state.func = FastFunction::from(state.func_body.clone());
 
-                    plot_func(&state);
-                    break;
-                }
-                Err(_) => {
-                    display::draw_string(
-                        string.as_str(),
-                        Point::new(0, 0),
-                        false,
-                        Color::RED,
-                        Color::WHITE,
-                    );
-                    timing::msleep(400);
-                }
+                plot_func(state);
+                break;
             }
         }
 

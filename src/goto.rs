@@ -37,7 +37,7 @@ pub fn goto(state: &mut State) {
 
         if keyboard::scan().key_down(key::BACK) {
             plot_rect(
-                &state,
+                state,
                 Rect {
                     x: 0,
                     y: 0,
@@ -48,28 +48,23 @@ pub fn goto(state: &mut State) {
             break;
         }
 
-        match y_selected {
-            false => {
-                if let Some(num) = keyboard_number(&mut x) {
-                    state.area.from_real = num - x_margin;
-                    state.area.to_real = num + x_margin;
-                    y_selected = true;
+        if !y_selected {
+            if let Some(num) = keyboard_number(&mut x) {
+                state.area.from_real = num - x_margin;
+                state.area.to_real = num + x_margin;
+                y_selected = true;
 
-                    while keyboard::scan().key_down(key::EXE) {}
-                }
+                while keyboard::scan().key_down(key::EXE) {}
             }
-            true => {
-                if let Some(num) = keyboard_number(&mut y) {
-                    state.area.from_imag = num - y_margin;
-                    state.area.to_imag = num + y_margin;
-                    break;
-                }
-            }
+        } else if let Some(num) = keyboard_number(&mut y) {
+            state.area.from_imag = num - y_margin;
+            state.area.to_imag = num + y_margin;
+            break;
         }
 
         timing::msleep(100);
         display::wait_for_vblank();
     }
 
-    plot_func(&state);
+    plot_func(state);
 }
