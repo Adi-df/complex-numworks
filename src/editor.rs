@@ -77,7 +77,11 @@ pub fn editor(state: &mut State) {
         } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::MINUS) {
             state.func_body.push(MathInstruction::Conj).unwrap();
         } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::XNT) {
-            state.func_body.push(MathInstruction::ZConj).unwrap();
+            state.func_body.push(MathInstruction::ConjZ).unwrap();
+        } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::FOUR) {
+            state.func_body.push(MathInstruction::Re).unwrap();
+        } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::TANGENT) {
+            state.func_body.push(MathInstruction::Im).unwrap();
         } else if keyboard_state.key_down(key::BACKSPACE) {
             state.func_body.pop();
         } else if keyboard_state.key_down(key::XNT) {

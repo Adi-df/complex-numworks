@@ -26,10 +26,12 @@ pub type StringFunction = String<FUNCTION_STRING_SIZE>;
 #[derive(Clone, Debug)]
 pub enum MathInstruction {
     Z,
-    ZConj,
     Number(f32),
 
+    ConjZ,
     Conj,
+    Re,
+    Im,
 
     Imag,
     Pi,
@@ -59,9 +61,14 @@ pub enum MathInstruction {
 #[derive(Clone, Debug)]
 pub enum FastMathInstr {
     Z,
-    ZConj,
     Number(Complex),
+
+    ConjZ,
     Conj,
+    ReZ,
+    ImZ,
+    Re,
+    Im,
 
     Add(Complex),
     Sub(Complex),
@@ -119,9 +126,12 @@ impl Display for MathInstruction {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             MathInstruction::Z => write!(f, "Z"),
-            MathInstruction::ZConj => write!(f, "Z*"),
             MathInstruction::Number(x) => write!(f, "{}", x),
+
+            MathInstruction::ConjZ => write!(f, "Z*"),
             MathInstruction::Conj => write!(f, "_"),
+            MathInstruction::Re => write!(f, "Re"),
+            MathInstruction::Im => write!(f, "Im"),
 
             MathInstruction::Imag => write!(f, "i"),
             MathInstruction::Pi => write!(f, "pi"),
@@ -227,11 +237,21 @@ impl Evaluate for Function {
         for instr in self.iter() {
             match instr {
                 MathInstruction::Z => stack.push(z).unwrap(),
-                MathInstruction::ZConj => stack.push(z.conj()).unwrap(),
                 MathInstruction::Number(x) => stack.push(Complex::from_real(*x)).unwrap(),
+
+                MathInstruction::ConjZ => stack.push(z.conj()).unwrap(),
                 MathInstruction::Conj => {
                     let c = stack.pop().unwrap();
                     stack.push(c.conj()).unwrap();
+                }
+
+                MathInstruction::Re => {
+                    let c = stack.pop().unwrap();
+                    stack.push(Complex::from_real(c.real)).unwrap();
+                }
+                MathInstruction::Im => {
+                    let c = stack.pop().unwrap();
+                    stack.push(Complex::from_real(c.imag)).unwrap();
                 }
 
                 MathInstruction::Imag => {
@@ -330,16 +350,33 @@ impl Evaluate for FastFunction {
                     stack_pointer += 1;
                     stack[stack_pointer] = z;
                 }
-                FastMathInstr::ZConj => {
-                    stack_pointer += 1;
-                    stack[stack_pointer] = z.conj();
-                }
                 FastMathInstr::Number(c) => {
                     stack_pointer += 1;
                     stack[stack_pointer] = *c;
                 }
+
+                FastMathInstr::ConjZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = z.conj();
+                }
                 FastMathInstr::Conj => {
                     stack[stack_pointer] = stack[stack_pointer].conj();
+                }
+
+                FastMathInstr::ReZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = Complex::from_real(z.real);
+                }
+                FastMathInstr::ImZ => {
+                    stack_pointer += 1;
+                    stack[stack_pointer] = Complex::from_real(z.imag);
+                }
+
+                FastMathInstr::Re => {
+                    stack[stack_pointer] = Complex::from_real(stack[stack_pointer].real);
+                }
+                FastMathInstr::Im => {
+                    stack[stack_pointer] = Complex::from_real(stack[stack_pointer].imag);
                 }
 
                 FastMathInstr::Add(c) => {
@@ -517,10 +554,12 @@ impl Validate for Function {
                 | MathInstruction::Pi
                 | MathInstruction::E
                 | MathInstruction::Z
-                | MathInstruction::ZConj => stack_size += 1,
+                | MathInstruction::ConjZ => stack_size += 1,
 
                 MathInstruction::Imag
                 | MathInstruction::Conj
+                | MathInstruction::Re
+                | MathInstruction::Im
                 | MathInstruction::Sqrt
                 | MathInstruction::Exp
                 | MathInstruction::Ln
@@ -566,7 +605,6 @@ impl From<Function> for FastFunction {
             while let Some(instr) = iter.next() {
                 out.push(match *instr {
                     MathInstruction::Z => FastMathInstr::Z,
-                    MathInstruction::ZConj => FastMathInstr::ZConj,
                     MathInstruction::Number(x) => {
                         if let Some(MathInstruction::Imag) = iter.peek() {
                             iter.next().unwrap();
@@ -575,7 +613,11 @@ impl From<Function> for FastFunction {
                             FastMathInstr::Number(Complex::from_real(x))
                         }
                     }
+
+                    MathInstruction::ConjZ => FastMathInstr::ConjZ,
                     MathInstruction::Conj => FastMathInstr::Conj,
+                    MathInstruction::Re => FastMathInstr::Re,
+                    MathInstruction::Im => FastMathInstr::Im,
 
                     MathInstruction::Pi => FastMathInstr::Number(Complex::from_real(PI)),
                     MathInstruction::E => FastMathInstr::Number(Complex::from_real(E)),
@@ -623,6 +665,19 @@ impl From<Function> for FastFunction {
                         FastMathInstr::Z => {
                             if let Some(n_instr) = iter.peek() {
                                 match n_instr {
+                                    FastMathInstr::Conj => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::ConjZ
+                                    }
+                                    FastMathInstr::Re => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::ReZ
+                                    }
+                                    FastMathInstr::Im => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::ImZ
+                                    }
+
                                     FastMathInstr::AddS => {
                                         iter.next().unwrap();
                                         FastMathInstr::AddZ
@@ -746,6 +801,14 @@ impl From<Function> for FastFunction {
                                     FastMathInstr::Conj => {
                                         iter.next().unwrap();
                                         FastMathInstr::Number(c.conj())
+                                    }
+                                    FastMathInstr::Re => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(Complex::from_real(c.real))
+                                    }
+                                    FastMathInstr::Im => {
+                                        iter.next().unwrap();
+                                        FastMathInstr::Number(Complex::from_real(c.imag))
                                     }
 
                                     FastMathInstr::Add(c2) => {
