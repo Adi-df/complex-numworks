@@ -4,6 +4,14 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAss
 
 use libm::{acosf, asinf, atan2f, atanf, cosf, expf, fabsf, logf, sinf, sqrtf, tanf};
 
+#[derive(Clone)]
+pub struct ComplexRect {
+    pub from_real: f32,
+    pub to_real: f32,
+    pub from_imag: f32,
+    pub to_imag: f32,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Complex {
     pub real: f32,

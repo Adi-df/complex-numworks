@@ -13,7 +13,7 @@ use heapless::String;
 use libm::{expf, fabsf, floorf, log2f, truncf};
 
 mod complex;
-use complex::Complex;
+use complex::{Complex, ComplexRect};
 
 mod function;
 use function::{Evaluate, FastFunction, Function, MathInstruction};
@@ -136,14 +136,6 @@ pub fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
         return Some(num.as_str().parse::<f32>().unwrap());
     }
     None
-}
-
-#[derive(Clone)]
-pub struct ComplexRect {
-    from_real: f32,
-    to_real: f32,
-    from_imag: f32,
-    to_imag: f32,
 }
 
 pub struct State {
