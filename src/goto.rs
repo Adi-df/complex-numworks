@@ -53,8 +53,6 @@ pub fn goto(state: &mut State) {
                 state.area.from_real = num - x_margin;
                 state.area.to_real = num + x_margin;
                 y_selected = true;
-
-                while keyboard::scan().key_down(key::EXE) {}
             }
         } else if let Some(num) = keyboard_number(&mut y) {
             state.area.from_imag = num - y_margin;

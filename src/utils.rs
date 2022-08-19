@@ -14,6 +14,10 @@ pub fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
     }
 }
 
+pub fn wait_till_released(k: u32) {
+    while keyboard::scan().key_down(k) {}
+}
+
 pub fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
     let keyboard_state = keyboard::scan();
 
@@ -47,6 +51,7 @@ pub fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
     } else if keyboard_state.key_down(key::BACKSPACE) && num.len() > 0 {
         num.pop().unwrap();
     } else if keyboard_state.key_down(key::EXE) {
+        wait_till_released(key::EXE);
         return Some(num.as_str().parse::<f32>().unwrap());
     }
     None
