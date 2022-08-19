@@ -54,8 +54,8 @@ fn _eadk_main() {
             area: ComplexRect {
                 from_real: -10.,
                 to_real: 10.,
-                from_imag: -10.,
-                to_imag: 10.,
+                from_imag: -7.5,
+                to_imag: 7.5,
             },
             color_mode: complex_to_color::sigmoid,
         }
