@@ -50,7 +50,7 @@ pub fn keyboard_number<const N: usize>(num: &mut String<N>) -> Option<f32> {
         }
     } else if keyboard_state.key_down(key::BACKSPACE) && num.len() > 0 {
         num.pop().unwrap();
-    } else if keyboard_state.key_down(key::EXE) {
+    } else if keyboard_state.key_down(key::EXE) && !num.is_empty() {
         wait_till_released(key::EXE);
         return Some(num.as_str().parse::<f32>().unwrap());
     }
