@@ -18,6 +18,8 @@ use complex::Complex;
 mod function;
 use function::{Evaluate, FastFunction, Function, MathInstruction};
 
+mod utils;
+
 mod editor;
 mod goto;
 mod values;
@@ -36,15 +38,6 @@ pub static EADK_APP_ICON: [u8; 3477] = *include_bytes!("../target/icon.nwi");
 
 pub const CHARACTERS_BY_LINE: usize = 45;
 pub const LINE_HEIGHT_IN_PIXEL: u16 = 14;
-
-pub fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
-    Complex {
-        real: (pos.0 as f32 / SCREEN_WIDTH as f32) * (area.to_real - area.from_real)
-            + area.from_real,
-        imag: (1. - pos.1 as f32 / SCREEN_HEIGHT as f32) * (area.to_imag - area.from_imag)
-            + area.from_imag,
-    }
-}
 
 fn log2_complex_to_color(z: Complex) -> Color {
     let value = fabsf(log2f(z.modulus()));

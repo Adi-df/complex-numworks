@@ -7,7 +7,9 @@ use crate::eadk::{
     key, keyboard, timing, Color, Point, Rect,
 };
 
-use crate::{map_to_complex, plot_rect, State, LINE_HEIGHT_IN_PIXEL};
+use crate::{plot_rect, State, LINE_HEIGHT_IN_PIXEL};
+
+use crate::utils;
 
 use crate::function::Evaluate;
 
@@ -17,7 +19,7 @@ pub fn values(state: &mut State) {
     loop {
         let keyboard_state = keyboard::scan();
 
-        let z = map_to_complex(&state.area, (x, y));
+        let z = utils::map_to_complex(&state.area, (x, y));
         let fz = state.func.eval(z);
 
         let mut s: String<256> = String::new();
