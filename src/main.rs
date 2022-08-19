@@ -4,10 +4,9 @@ pub mod eadk;
 
 use eadk::{
     display::{self, SCREEN_HEIGHT, SCREEN_WIDTH},
-    key, keyboard, timing, Color, Point, Rect,
+    key, keyboard, Color, Rect,
 };
 
-use core::fmt::Write;
 use core::iter::FromIterator;
 
 use heapless::String;
@@ -17,8 +16,9 @@ mod complex;
 use complex::Complex;
 
 mod function;
-use function::{Evaluate, FastFunction, Function, MathInstruction, StringFunction, Validate};
+use function::{Evaluate, FastFunction, Function, MathInstruction};
 
+mod editor;
 mod goto;
 mod values;
 
@@ -37,7 +37,7 @@ pub static EADK_APP_ICON: [u8; 3477] = *include_bytes!("../target/icon.nwi");
 pub const CHARACTERS_BY_LINE: usize = 45;
 pub const LINE_HEIGHT_IN_PIXEL: u16 = 14;
 
-fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
+pub fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
     Complex {
         real: (pos.0 as f32 / SCREEN_WIDTH as f32) * (area.to_real - area.from_real)
             + area.from_real,
@@ -155,23 +155,26 @@ pub struct ComplexRect {
 
 pub struct State {
     func: FastFunction,
+    func_body: Function,
     area: ComplexRect,
     color_mode: fn(Complex) -> Color,
 }
 
 #[no_mangle]
 fn _eadk_main() {
-    let mut func_body = Function::from_slice(&[MathInstruction::Z]);
-
-    let mut state = State {
-        func: FastFunction::from(func_body.clone()),
-        area: ComplexRect {
-            from_real: -10.,
-            to_real: 10.,
-            from_imag: -10.,
-            to_imag: 10.,
-        },
-        color_mode: sigmoid_complex_to_color,
+    let mut state = {
+        let func_body = Function::from_slice(&[MathInstruction::Z]);
+        State {
+            func: FastFunction::from(func_body.clone()),
+            func_body,
+            area: ComplexRect {
+                from_real: -10.,
+                to_real: 10.,
+                from_imag: -10.,
+                to_imag: 10.,
+            },
+            color_mode: sigmoid_complex_to_color,
+        }
     };
 
     plot_func(&state);
@@ -262,178 +265,10 @@ fn _eadk_main() {
         // Explore values
         else if keyboard_state.key_down(key::VAR) {
             values::values(&mut state);
-        } else if keyboard_state.key_down(key::TOOLBOX) {
-            let mut max_line_count = 1;
-            let previous_body = func_body.clone();
-
-            loop {
-                let keyboard_state = keyboard::scan();
-
-                let number_pressed = keyboard_state.key_down(key::ZERO)
-                    || keyboard_state.key_down(key::ONE)
-                    || keyboard_state.key_down(key::TWO)
-                    || keyboard_state.key_down(key::THREE)
-                    || keyboard_state.key_down(key::FOUR)
-                    || keyboard_state.key_down(key::FIVE)
-                    || keyboard_state.key_down(key::SIX)
-                    || keyboard_state.key_down(key::SEVEN)
-                    || keyboard_state.key_down(key::EIGHT)
-                    || keyboard_state.key_down(key::NINE);
-
-                let mut line_count = 1;
-                let string: StringFunction = StringFunction::from(func_body.clone())
-                    .split_inclusive(' ')
-                    .into_iter()
-                    .fold(StringFunction::new(), |mut str, el| {
-                        if str.chars().count() % CHARACTERS_BY_LINE + el.chars().count()
-                            > CHARACTERS_BY_LINE
-                        {
-                            line_count += 1;
-                            str.push('\n').unwrap();
-                        }
-                        str.push_str(el).unwrap();
-                        str
-                    });
-                max_line_count = max_line_count.max(line_count);
-
-                display::push_rect_uniform(
-                    Rect {
-                        x: 0,
-                        y: 0,
-                        width: SCREEN_WIDTH,
-                        height: max_line_count * LINE_HEIGHT_IN_PIXEL,
-                    },
-                    Color::WHITE,
-                );
-
-                display::draw_string(
-                    string.as_str(),
-                    Point::new(0, 0),
-                    false,
-                    Color::BLACK,
-                    Color::WHITE,
-                );
-
-                if keyboard_state.key_down(key::SHIFT) && keyboard_state.key_down(key::EXP) {
-                    func_body.push(MathInstruction::E).unwrap();
-                } else if keyboard_state.key_down(key::SHIFT) && keyboard_state.key_down(key::SINE)
-                {
-                    func_body.push(MathInstruction::Arcsin).unwrap();
-                } else if keyboard_state.key_down(key::SHIFT)
-                    && keyboard_state.key_down(key::COSINE)
-                {
-                    func_body.push(MathInstruction::Arccos).unwrap();
-                } else if keyboard_state.key_down(key::SHIFT)
-                    && keyboard_state.key_down(key::TANGENT)
-                {
-                    func_body.push(MathInstruction::Arctan).unwrap();
-                } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::MINUS)
-                {
-                    func_body.push(MathInstruction::Conj).unwrap();
-                } else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::XNT) {
-                    func_body.push(MathInstruction::ZConj).unwrap();
-                } else if keyboard_state.key_down(key::BACKSPACE) {
-                    func_body.pop();
-                } else if keyboard_state.key_down(key::XNT) {
-                    func_body.push(MathInstruction::Z).unwrap();
-                } else if keyboard_state.key_down(key::IMAGINARY) {
-                    func_body.push(MathInstruction::Imag).unwrap();
-                } else if keyboard_state.key_down(key::PI) {
-                    func_body.push(MathInstruction::Pi).unwrap();
-                } else if keyboard_state.key_down(key::PLUS) {
-                    func_body.push(MathInstruction::Add).unwrap();
-                } else if keyboard_state.key_down(key::MINUS) {
-                    func_body.push(MathInstruction::Sub).unwrap();
-                } else if keyboard_state.key_down(key::MULTIPLICATION) {
-                    func_body.push(MathInstruction::Mul).unwrap();
-                } else if keyboard_state.key_down(key::DIVISION) {
-                    func_body.push(MathInstruction::Div).unwrap();
-                } else if keyboard_state.key_down(key::POWER) {
-                    func_body.push(MathInstruction::Pow).unwrap();
-                } else if keyboard_state.key_down(key::EXP) {
-                    func_body.push(MathInstruction::Exp).unwrap();
-                } else if keyboard_state.key_down(key::LN) {
-                    func_body.push(MathInstruction::Ln).unwrap();
-                } else if keyboard_state.key_down(key::LOG) {
-                    func_body.push(MathInstruction::Log).unwrap();
-                } else if keyboard_state.key_down(key::SINE) {
-                    func_body.push(MathInstruction::Sin).unwrap();
-                } else if keyboard_state.key_down(key::COSINE) {
-                    func_body.push(MathInstruction::Cos).unwrap();
-                } else if keyboard_state.key_down(key::TANGENT) {
-                    func_body.push(MathInstruction::Tan).unwrap();
-                } else if keyboard_state.key_down(key::SQUARE) {
-                    func_body.push(MathInstruction::Number(2.)).unwrap();
-                    func_body.push(MathInstruction::Pow).unwrap();
-                } else if keyboard_state.key_down(key::SQRT) {
-                    func_body.push(MathInstruction::Sqrt).unwrap();
-                } else if number_pressed {
-                    let mut num: String<32> = String::new();
-                    loop {
-                        display::push_rect_uniform(
-                            Rect {
-                                x: 0,
-                                y: 0,
-                                width: SCREEN_WIDTH,
-                                height: LINE_HEIGHT_IN_PIXEL,
-                            },
-                            Color::WHITE,
-                        );
-
-                        let mut num_str: String<33> = String::new();
-                        write!(&mut num_str, "{}\0", num).unwrap();
-                        display::draw_string(
-                            &num_str,
-                            Point::ZERO,
-                            false,
-                            Color::BLACK,
-                            Color::WHITE,
-                        );
-
-                        if let Some(num) = keyboard_number(&mut num) {
-                            func_body.push(MathInstruction::Number(num)).unwrap();
-                            break;
-                        }
-
-                        timing::msleep(100);
-                        display::wait_for_vblank();
-                    }
-                } else if keyboard_state.key_down(key::BACK) {
-                    func_body = previous_body;
-                    plot_rect(
-                        &state,
-                        Rect {
-                            x: 0,
-                            y: 0,
-                            width: SCREEN_WIDTH,
-                            height: max_line_count * LINE_HEIGHT_IN_PIXEL,
-                        },
-                    );
-                    break;
-                } else if keyboard_state.key_down(key::OK) {
-                    match func_body.validate() {
-                        Ok(()) => {
-                            state.func = FastFunction::from(func_body.clone());
-
-                            plot_func(&state);
-                            break;
-                        }
-                        Err(_) => {
-                            display::draw_string(
-                                string.as_str(),
-                                Point::new(0, 0),
-                                false,
-                                Color::RED,
-                                Color::WHITE,
-                            );
-                            timing::msleep(400);
-                        }
-                    }
-                }
-
-                timing::msleep(100);
-                display::wait_for_vblank();
-            }
+        }
+        //Editor
+        else if keyboard_state.key_down(key::TOOLBOX) {
+            editor::editor(&mut state);
         }
     }
 }
