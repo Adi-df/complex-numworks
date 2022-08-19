@@ -38,7 +38,7 @@ pub fn editor(state: &mut State) {
             .into_iter()
             .fold(StringFunction::new(), |mut str, el| {
                 if str.chars().count() % CHARACTERS_BY_LINE + el.chars().count()
-                    > CHARACTERS_BY_LINE
+                    >= CHARACTERS_BY_LINE
                 {
                     line_count += 1;
                     str.push('\n').unwrap();
@@ -60,7 +60,7 @@ pub fn editor(state: &mut State) {
 
         display::draw_string(
             string.as_str(),
-            Point::new(0, 0),
+            Point::ZERO,
             false,
             Color::BLACK,
             Color::WHITE,
