@@ -47,7 +47,7 @@ pub struct State {
 #[no_mangle]
 fn _eadk_main() {
     let mut state = {
-        let func_body = Function::from_slice(&[MathInstruction::Z]);
+        let func_body = Function::from([MathInstruction::Z].as_slice());
         State {
             func: FastFunction::from(func_body.clone()),
             func_body,

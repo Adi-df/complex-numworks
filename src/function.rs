@@ -1,7 +1,7 @@
 use core::{
     f32::consts::{E, PI},
     fmt::{Display, Write},
-    iter::IntoIterator,
+    iter::{FromIterator, IntoIterator},
     ops::{Deref, DerefMut},
     slice,
 };
@@ -161,10 +161,18 @@ impl Display for MathInstruction {
     }
 }
 
-impl Function {
-    pub fn from_slice(s: &[MathInstruction]) -> Self {
+impl From<&[MathInstruction]> for Function {
+    fn from(s: &[MathInstruction]) -> Self {
         Self {
             instructions: Vec::from_slice(s).unwrap(),
+        }
+    }
+}
+
+impl FromIterator<FastMathInstr> for FastFunction {
+    fn from_iter<T: IntoIterator<Item = FastMathInstr>>(iter: T) -> Self {
+        Self {
+            instructions: Vec::from_iter(iter),
         }
     }
 }
@@ -598,57 +606,43 @@ impl Validate for Function {
 impl From<Function> for FastFunction {
     fn from(func: Function) -> Self {
         // MathInstr to FastMathInstr && Simplify Number -> Imag to Number
-        let mut fast_instr = {
-            let mut iter = func.into_iter().peekable();
-            let mut out = FastFunction::default();
+        let mut fast_instr: FastFunction = func
+            .into_iter()
+            .map(|instr| match *instr {
+                MathInstruction::Z => FastMathInstr::Z,
+                MathInstruction::Number(x) => FastMathInstr::Number(Complex::from_real(x)),
+                MathInstruction::Imag => FastMathInstr::Mul(Complex::I),
 
-            while let Some(instr) = iter.next() {
-                out.push(match *instr {
-                    MathInstruction::Z => FastMathInstr::Z,
-                    MathInstruction::Number(x) => {
-                        if let Some(MathInstruction::Imag) = iter.peek() {
-                            iter.next().unwrap();
-                            FastMathInstr::Number(Complex::from_imag(x))
-                        } else {
-                            FastMathInstr::Number(Complex::from_real(x))
-                        }
-                    }
+                MathInstruction::ConjZ => FastMathInstr::ConjZ,
+                MathInstruction::Conj => FastMathInstr::Conj,
+                MathInstruction::Re => FastMathInstr::Re,
+                MathInstruction::Im => FastMathInstr::Im,
 
-                    MathInstruction::ConjZ => FastMathInstr::ConjZ,
-                    MathInstruction::Conj => FastMathInstr::Conj,
-                    MathInstruction::Re => FastMathInstr::Re,
-                    MathInstruction::Im => FastMathInstr::Im,
+                MathInstruction::Pi => FastMathInstr::Number(Complex::from_real(PI)),
+                MathInstruction::E => FastMathInstr::Number(Complex::from_real(E)),
 
-                    MathInstruction::Pi => FastMathInstr::Number(Complex::from_real(PI)),
-                    MathInstruction::E => FastMathInstr::Number(Complex::from_real(E)),
+                MathInstruction::Add => FastMathInstr::AddS,
+                MathInstruction::Sub => FastMathInstr::SubS,
+                MathInstruction::Mul => FastMathInstr::MulS,
+                MathInstruction::Div => FastMathInstr::DivS,
+                MathInstruction::Pow => FastMathInstr::PowS,
 
-                    MathInstruction::Imag => unreachable!(),
+                MathInstruction::Sqrt => FastMathInstr::PowR(0.5),
 
-                    MathInstruction::Add => FastMathInstr::AddS,
-                    MathInstruction::Sub => FastMathInstr::SubS,
-                    MathInstruction::Mul => FastMathInstr::MulS,
-                    MathInstruction::Div => FastMathInstr::DivS,
-                    MathInstruction::Pow => FastMathInstr::PowS,
+                MathInstruction::Exp => FastMathInstr::Exp,
+                MathInstruction::Ln => FastMathInstr::Ln,
 
-                    MathInstruction::Sqrt => FastMathInstr::PowR(0.5),
+                MathInstruction::Log => FastMathInstr::LogS,
 
-                    MathInstruction::Exp => FastMathInstr::Exp,
-                    MathInstruction::Ln => FastMathInstr::Ln,
+                MathInstruction::Sin => FastMathInstr::Sin,
+                MathInstruction::Cos => FastMathInstr::Cos,
+                MathInstruction::Tan => FastMathInstr::Tan,
 
-                    MathInstruction::Log => FastMathInstr::LogS,
-
-                    MathInstruction::Sin => FastMathInstr::Sin,
-                    MathInstruction::Cos => FastMathInstr::Cos,
-                    MathInstruction::Tan => FastMathInstr::Tan,
-
-                    MathInstruction::Arcsin => FastMathInstr::Arcsin,
-                    MathInstruction::Arccos => FastMathInstr::Arccos,
-                    MathInstruction::Arctan => FastMathInstr::Arctan,
-                })
-                .unwrap();
-            }
-            out
-        };
+                MathInstruction::Arcsin => FastMathInstr::Arcsin,
+                MathInstruction::Arccos => FastMathInstr::Arccos,
+                MathInstruction::Arctan => FastMathInstr::Arctan,
+            })
+            .collect();
 
         let mut previous_len = fast_instr.len() + 1;
 
