@@ -1,3 +1,5 @@
+use libm::{expf, fabsf, floorf, log2f, truncf};
+
 use crate::eadk::display::{self, SCREEN_HEIGHT, SCREEN_WIDTH};
 use crate::eadk::{Color, Rect};
 
@@ -47,4 +49,27 @@ pub fn plot_func(state: &State) {
             height: SCREEN_HEIGHT,
         },
     );
+}
+
+pub mod complex_to_color {
+    use super::*;
+
+    pub fn log2(z: Complex) -> Color {
+        let value = fabsf(log2f(z.modulus()));
+        Color::from_hv(z.argument(), value - truncf(value))
+    }
+    pub fn sigmoid(z: Complex) -> Color {
+        let value = (2. / (1. + expf(-z.modulus()))) - 1.;
+        Color::from_hv(z.argument(), value)
+    }
+    pub fn checkerboard(z: Complex) -> Color {
+        Color::from_hv(
+            z.argument(),
+            if fabsf(floorf(z.real)) as u16 % 2 == fabsf(floorf(z.imag)) as u16 % 2 {
+                0.5
+            } else {
+                1.
+            },
+        )
+    }
 }

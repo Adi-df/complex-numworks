@@ -7,8 +7,6 @@ use eadk::{
     key, keyboard, Color,
 };
 
-use libm::{expf, fabsf, floorf, log2f, truncf};
-
 mod complex;
 use complex::{Complex, ComplexRect};
 
@@ -17,6 +15,7 @@ use function::{FastFunction, Function, MathInstruction};
 
 mod plot;
 mod utils;
+use plot::complex_to_color;
 use plot::plot_func;
 
 mod editor;
@@ -38,25 +37,6 @@ pub static EADK_APP_ICON: [u8; 3477] = *include_bytes!("../target/icon.nwi");
 pub const CHARACTERS_BY_LINE: usize = 45;
 pub const LINE_HEIGHT_IN_PIXEL: u16 = 14;
 
-fn log2_complex_to_color(z: Complex) -> Color {
-    let value = fabsf(log2f(z.modulus()));
-    Color::from_hv(z.argument(), value - truncf(value))
-}
-fn sigmoid_complex_to_color(z: Complex) -> Color {
-    let value = (2. / (1. + expf(-z.modulus()))) - 1.;
-    Color::from_hv(z.argument(), value)
-}
-fn checkerboard_complex_to_color(z: Complex) -> Color {
-    Color::from_hv(
-        z.argument(),
-        if fabsf(floorf(z.real)) as u16 % 2 == fabsf(floorf(z.imag)) as u16 % 2 {
-            0.5
-        } else {
-            1.
-        },
-    )
-}
-
 pub struct State {
     func: FastFunction,
     func_body: Function,
@@ -77,7 +57,7 @@ fn _eadk_main() {
                 from_imag: -10.,
                 to_imag: 10.,
             },
-            color_mode: sigmoid_complex_to_color,
+            color_mode: complex_to_color::sigmoid,
         }
     };
 
@@ -142,23 +122,23 @@ fn _eadk_main() {
         // Style
         else if keyboard_state.key_down(key::ALPHA)
             && keyboard_state.key_down(key::FIVE)
-            && state.color_mode != sigmoid_complex_to_color
+            && state.color_mode != complex_to_color::sigmoid
         {
-            state.color_mode = sigmoid_complex_to_color;
+            state.color_mode = complex_to_color::sigmoid;
 
             plot_func(&state);
         } else if keyboard_state.key_down(key::ALPHA)
             && keyboard_state.key_down(key::FOUR)
-            && state.color_mode != checkerboard_complex_to_color
+            && state.color_mode != complex_to_color::checkerboard
         {
-            state.color_mode = checkerboard_complex_to_color;
+            state.color_mode = complex_to_color::checkerboard;
 
             plot_func(&state);
         } else if keyboard_state.key_down(key::ALPHA)
             && keyboard_state.key_down(key::SIX)
-            && state.color_mode != log2_complex_to_color
+            && state.color_mode != complex_to_color::log2
         {
-            state.color_mode = log2_complex_to_color;
+            state.color_mode = complex_to_color::log2;
 
             plot_func(&state);
         }
