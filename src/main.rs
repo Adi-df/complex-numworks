@@ -347,7 +347,7 @@ fn _eadk_main() {
                 let z = map_to_complex(&state.area, (x, y));
                 let fz = state.func.eval(z);
 
-                let mut s: String<100> = String::new();
+                let mut s: String<256> = String::new();
                 write!(&mut s, "z = {z}\nf(z) = {fz}\0").unwrap();
                 display::push_rect_uniform(
                     Rect {
