@@ -20,6 +20,7 @@ mod function;
 use function::{Evaluate, FastFunction, Function, MathInstruction, StringFunction, Validate};
 
 mod goto;
+mod values;
 
 #[export_name = "eadk_app_name"]
 #[link_section = ".rodata.eadk_app_name"]
@@ -258,75 +259,9 @@ fn _eadk_main() {
         else if keyboard_state.key_down(key::ALPHA) && keyboard_state.key_down(key::SINE) {
             goto::goto(&mut state);
         }
-        // Modes
+        // Explore values
         else if keyboard_state.key_down(key::VAR) {
-            let (mut x, mut y) = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-
-            loop {
-                let keyboard_state = keyboard::scan();
-
-                let z = map_to_complex(&state.area, (x, y));
-                let fz = state.func.eval(z);
-
-                let mut s: String<256> = String::new();
-                write!(&mut s, "z = {z}\nf(z) = {fz}\0").unwrap();
-                display::push_rect_uniform(
-                    Rect {
-                        x: 0,
-                        y: 0,
-                        width: SCREEN_WIDTH,
-                        height: LINE_HEIGHT_IN_PIXEL * 2,
-                    },
-                    Color::WHITE,
-                );
-                display::draw_string(&s, Point::new(0, 0), false, Color::BLACK, Color::WHITE);
-                display::push_rect_uniform(
-                    Rect {
-                        x,
-                        y,
-                        width: 1,
-                        height: 1,
-                    },
-                    (state.color_mode)(fz),
-                );
-
-                if keyboard_state.key_down(key::RIGHT) {
-                    x += 1;
-                } else if keyboard_state.key_down(key::LEFT) {
-                    x -= 1;
-                }
-
-                if keyboard_state.key_down(key::UP) {
-                    y -= 1;
-                } else if keyboard_state.key_down(key::DOWN) {
-                    y += 1;
-                } else if keyboard_state.key_down(key::BACK) {
-                    plot_rect(
-                        &state,
-                        Rect {
-                            x: 0,
-                            y: 0,
-                            width: SCREEN_WIDTH,
-                            height: LINE_HEIGHT_IN_PIXEL * 2,
-                        },
-                    );
-
-                    break;
-                }
-
-                display::push_rect_uniform(
-                    Rect {
-                        x,
-                        y,
-                        width: 1,
-                        height: 1,
-                    },
-                    Color::WHITE,
-                );
-
-                display::wait_for_vblank();
-                timing::msleep(50);
-            }
+            values::values(&mut state);
         } else if keyboard_state.key_down(key::TOOLBOX) {
             let mut max_line_count = 1;
             let previous_body = func_body.clone();
