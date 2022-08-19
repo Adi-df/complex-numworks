@@ -32,6 +32,7 @@ To enter a **real** number, press any digit and type your number then press EXE.
 For a complex one, just enter a real, use the I key and then just add another real as usual.  
 
 The conjugate a number, use ALPHA + MINUS. And to get z conjugate, just use ALPHA + XNT.  
+Use ALPHA+4 and ALPHA+TAN to add `Re(z)` and `Im(z)`
 
 Parenthesis aren't implemented as there's no need for it in RPN.\
 The Log key mean log base a:
