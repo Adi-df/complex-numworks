@@ -7,9 +7,10 @@ use crate::eadk::{
     key, keyboard, timing, Color, Point, Rect,
 };
 
+use crate::plot::{plot_func, plot_rect};
 use crate::utils::keyboard_number;
 
-use crate::{plot_func, plot_rect, State, LINE_HEIGHT_IN_PIXEL};
+use crate::{State, LINE_HEIGHT_IN_PIXEL};
 
 pub fn goto(state: &mut State) {
     let mut x: String<20> = String::new();

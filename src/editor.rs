@@ -9,9 +9,10 @@ use crate::eadk::{Color, Point, Rect};
 
 use crate::function::{FastFunction, MathInstruction, StringFunction, Validate};
 
+use crate::plot::{plot_func, plot_rect};
 use crate::utils::keyboard_number;
 
-use crate::{plot_func, plot_rect, State, CHARACTERS_BY_LINE, LINE_HEIGHT_IN_PIXEL};
+use crate::{State, CHARACTERS_BY_LINE, LINE_HEIGHT_IN_PIXEL};
 
 pub fn editor(state: &mut State) {
     let mut max_line_count = 1;

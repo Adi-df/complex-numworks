@@ -3,8 +3,8 @@
 pub mod eadk;
 
 use eadk::{
-    display::{self, SCREEN_HEIGHT, SCREEN_WIDTH},
-    key, keyboard, Color, Rect,
+    display::{SCREEN_HEIGHT, SCREEN_WIDTH},
+    key, keyboard, Color,
 };
 
 use libm::{expf, fabsf, floorf, log2f, truncf};
@@ -13,9 +13,11 @@ mod complex;
 use complex::{Complex, ComplexRect};
 
 mod function;
-use function::{Evaluate, FastFunction, Function, MathInstruction};
+use function::{FastFunction, Function, MathInstruction};
 
+mod plot;
 mod utils;
+use plot::plot_func;
 
 mod editor;
 mod goto;
@@ -53,48 +55,6 @@ fn checkerboard_complex_to_color(z: Complex) -> Color {
             1.
         },
     )
-}
-
-pub fn plot_rect(state: &State, rect: Rect) {
-    let mut row: [Color; SCREEN_WIDTH as usize] = [Color::BLACK; SCREEN_WIDTH as usize];
-    (rect.y..rect.height).for_each(|y| {
-        let imag = (1. - y as f32 / SCREEN_HEIGHT as f32)
-            * (state.area.to_imag - state.area.from_imag)
-            + state.area.from_imag;
-
-        (&mut row[0..rect.width as usize])
-            .iter_mut()
-            .enumerate()
-            .for_each(move |(x, p)| {
-                *p = (state.color_mode)(state.func.eval(Complex {
-                    real: (x as f32 / SCREEN_WIDTH as f32)
-                        * (state.area.to_real - state.area.from_real)
-                        + state.area.from_real,
-                    imag,
-                }))
-            });
-        display::push_rect(
-            Rect {
-                x: rect.x,
-                y,
-                width: rect.width,
-                height: 1,
-            },
-            &row,
-        );
-    });
-}
-
-pub fn plot_func(state: &State) {
-    plot_rect(
-        state,
-        Rect {
-            x: 0,
-            y: 0,
-            width: SCREEN_WIDTH,
-            height: SCREEN_HEIGHT,
-        },
-    );
 }
 
 pub struct State {

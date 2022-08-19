@@ -7,11 +7,12 @@ use crate::eadk::{
     key, keyboard, timing, Color, Point, Rect,
 };
 
-use crate::{plot_rect, State, LINE_HEIGHT_IN_PIXEL};
+use crate::function::Evaluate;
 
+use crate::plot::plot_rect;
 use crate::utils;
 
-use crate::function::Evaluate;
+use crate::{State, LINE_HEIGHT_IN_PIXEL};
 
 pub fn values(state: &mut State) {
     let (mut x, mut y) = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
