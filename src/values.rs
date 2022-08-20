@@ -10,9 +10,10 @@ use crate::eadk::{
 use crate::function::Evaluate;
 
 use crate::plot::plot_rect;
-use crate::utils;
+use crate::utils::map_to_complex;
+use crate::utils::CHARACTER_HEIGHT;
 
-use crate::{State, LINE_HEIGHT_IN_PIXEL};
+use crate::State;
 
 pub fn values(state: &mut State) {
     let (mut x, mut y) = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -20,7 +21,7 @@ pub fn values(state: &mut State) {
     loop {
         let keyboard_state = keyboard::scan();
 
-        let z = utils::map_to_complex(&state.area, (x, y));
+        let z = map_to_complex(&state.area, (x, y));
         let fz = state.func.eval(z);
 
         let mut s: String<256> = String::new();
@@ -30,7 +31,7 @@ pub fn values(state: &mut State) {
                 x: 0,
                 y: 0,
                 width: SCREEN_WIDTH,
-                height: LINE_HEIGHT_IN_PIXEL * 2,
+                height: CHARACTER_HEIGHT * 2,
             },
             Color::WHITE,
         );
@@ -62,7 +63,7 @@ pub fn values(state: &mut State) {
                     x: 0,
                     y: 0,
                     width: SCREEN_WIDTH,
-                    height: LINE_HEIGHT_IN_PIXEL * 2,
+                    height: CHARACTER_HEIGHT * 2,
                 },
             );
 

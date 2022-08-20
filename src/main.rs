@@ -34,9 +34,6 @@ pub static EADK_APP_API_LEVEL: u32 = 0;
 #[link_section = ".rodata.eadk_app_icon"]
 pub static EADK_APP_ICON: [u8; 3477] = *include_bytes!("../target/icon.nwi");
 
-pub const CHARACTERS_BY_LINE: usize = 45;
-pub const LINE_HEIGHT_IN_PIXEL: u16 = 14;
-
 pub struct State {
     func: FastFunction,
     func_body: Function,

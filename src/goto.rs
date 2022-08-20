@@ -9,8 +9,9 @@ use crate::eadk::{
 
 use crate::plot::{plot_func, plot_rect};
 use crate::utils::keyboard_number;
+use crate::utils::CHARACTER_HEIGHT;
 
-use crate::{State, LINE_HEIGHT_IN_PIXEL};
+use crate::State;
 
 pub fn goto(state: &mut State) {
     let mut x: String<20> = String::new();
@@ -26,7 +27,7 @@ pub fn goto(state: &mut State) {
                 x: 0,
                 y: 0,
                 width: SCREEN_WIDTH,
-                height: LINE_HEIGHT_IN_PIXEL * 2,
+                height: CHARACTER_HEIGHT * 2,
             },
             Color::WHITE,
         );
@@ -42,7 +43,7 @@ pub fn goto(state: &mut State) {
                     x: 0,
                     y: 0,
                     width: SCREEN_WIDTH,
-                    height: LINE_HEIGHT_IN_PIXEL * 2,
+                    height: CHARACTER_HEIGHT * 2,
                 },
             );
             break;

@@ -5,6 +5,10 @@ use crate::eadk::{key, keyboard};
 
 use crate::complex::{Complex, ComplexRect};
 
+pub const CHARACTERS_BY_LINE: usize = 45;
+pub const CHARACTER_WIDTH: u16 = 7;
+pub const CHARACTER_HEIGHT: u16 = 14;
+
 pub fn map_to_complex(area: &ComplexRect, pos: (u16, u16)) -> Complex {
     Complex {
         real: (pos.0 as f32 / SCREEN_WIDTH as f32) * (area.to_real - area.from_real)

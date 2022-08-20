@@ -10,9 +10,10 @@ use crate::eadk::{Color, Point, Rect};
 use crate::function::{FastFunction, MathInstruction, StringFunction, SyntaxError, Validate};
 
 use crate::plot::{plot_func, plot_rect};
-use crate::utils::keyboard_number;
+use crate::utils::{keyboard_number, CHARACTER_WIDTH};
+use crate::utils::{CHARACTERS_BY_LINE, CHARACTER_HEIGHT};
 
-use crate::{State, CHARACTERS_BY_LINE, LINE_HEIGHT_IN_PIXEL};
+use crate::State;
 
 pub fn editor(state: &mut State) {
     let mut max_line_count = 1;
@@ -53,7 +54,7 @@ pub fn editor(state: &mut State) {
                 x: 0,
                 y: 0,
                 width: SCREEN_WIDTH,
-                height: max_line_count * LINE_HEIGHT_IN_PIXEL,
+                height: max_line_count * CHARACTER_HEIGHT,
             },
             Color::WHITE,
         );
@@ -125,7 +126,7 @@ pub fn editor(state: &mut State) {
                         x: 0,
                         y: 0,
                         width: SCREEN_WIDTH,
-                        height: LINE_HEIGHT_IN_PIXEL,
+                        height: CHARACTER_HEIGHT,
                     },
                     Color::BLACK,
                 );
@@ -150,21 +151,58 @@ pub fn editor(state: &mut State) {
                     x: 0,
                     y: 0,
                     width: SCREEN_WIDTH,
-                    height: max_line_count * LINE_HEIGHT_IN_PIXEL,
+                    height: max_line_count * CHARACTER_HEIGHT,
                 },
             );
             break;
         } else if keyboard_state.key_down(key::OK) {
-            if let Err(SyntaxError { op_index: _index }) = state.func_body.validate() {
-                display::draw_string(
-                    string.as_str(),
-                    Point::new(0, 0),
-                    false,
-                    Color::RED,
-                    Color::WHITE,
-                );
+            if let Err(SyntaxError { op_index: index }) = state.func_body.validate() {
+                if index == usize::MAX {
+                    display::draw_string(
+                        string.as_str(),
+                        Point::new(0, 0),
+                        false,
+                        Color::RED,
+                        Color::WHITE,
+                    );
+                    timing::msleep(400);
+                } else {
+                    let (x, y) = string
+                        .split_inclusive(' ')
+                        .into_iter()
+                        .scan((0, 0), |(x, y), el| {
+                            el.chars().for_each(|c| {
+                                if c == '\n' {
+                                    *x = 0;
+                                    *y += 1;
+                                } else {
+                                    *x += 1;
+                                }
+                            });
+                            Some((*x, *y))
+                        })
+                        .nth(index)
+                        .unwrap();
+
+                    let mut syntax_error_str: String<16> = String::new();
+                    write!(&mut syntax_error_str, "{}\0", state.func_body[index]).unwrap();
+
+                    display::draw_string(
+                        string.as_str(),
+                        Point::new(0, 0),
+                        false,
+                        Color::BLACK,
+                        Color::WHITE,
+                    );
+                    display::draw_string(
+                        syntax_error_str.as_str(),
+                        Point::new(x as u16 * CHARACTER_WIDTH, y as u16 * CHARACTER_HEIGHT),
+                        false,
+                        Color::RED,
+                        Color::WHITE,
+                    );
+                }
             } else {
-                timing::msleep(400);
                 state.func = FastFunction::from(state.func_body.clone());
 
                 plot_func(state);
