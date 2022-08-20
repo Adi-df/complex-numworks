@@ -146,6 +146,15 @@ pub fn editor(state: &mut State) {
                 timing::msleep(100);
                 display::wait_for_vblank();
             }
+            display::push_rect_uniform(
+                Rect {
+                    x: 0,
+                    y: 0,
+                    width: SCREEN_WIDTH,
+                    height: max_line_count * CHARACTER_HEIGHT,
+                },
+                Color::WHITE,
+            );
         } else if keyboard_state.key_down(key::BACK) {
             state.func_body = previous_body;
             plot_rect(
