@@ -93,6 +93,11 @@ impl State {
     pub fn key_down(&self, k: u32) -> bool {
         self.0.wrapping_shr(k) & 1 != 0
     }
+
+    #[must_use]
+    pub fn any_down(&self) -> bool {
+        self.0 != 0
+    }
 }
 
 pub mod key {

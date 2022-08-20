@@ -47,17 +47,20 @@ pub fn editor(state: &mut State) {
                 str.push_str(el).unwrap();
                 str
             });
-        max_line_count = max_line_count.max(line_count);
 
-        display::push_rect_uniform(
-            Rect {
-                x: 0,
-                y: 0,
-                width: SCREEN_WIDTH,
-                height: max_line_count * CHARACTER_HEIGHT,
-            },
-            Color::WHITE,
-        );
+        if keyboard_state.any_down() || line_count > max_line_count {
+            display::push_rect_uniform(
+                Rect {
+                    x: 0,
+                    y: 0,
+                    width: SCREEN_WIDTH,
+                    height: max_line_count.max(line_count) * CHARACTER_HEIGHT,
+                },
+                Color::WHITE,
+            );
+        }
+
+        max_line_count = max_line_count.max(line_count);
 
         display::draw_string(
             string.as_str(),
