@@ -1,4 +1,4 @@
-use libm::{expf, fabsf, floorf, log2f, truncf};
+use libm::{fabsf, floorf, log2f, tanhf, truncf};
 
 use crate::eadk::display::{self, SCREEN_HEIGHT, SCREEN_WIDTH};
 use crate::eadk::{Color, Rect};
@@ -54,7 +54,7 @@ pub fn plot_func(state: &State) {
 }
 
 pub mod complex_to_color {
-    use super::{expf, fabsf, floorf, log2f, truncf, Color, Complex};
+    use super::{fabsf, floorf, log2f, tanhf, truncf, Color, Complex};
 
     #[derive(PartialEq, Eq, Clone, Copy)]
     pub enum ColorMapper {
@@ -77,7 +77,7 @@ pub mod complex_to_color {
         Color::from_hv(z.argument(), value - truncf(value))
     }
     pub fn sigmoid(z: Complex) -> Color {
-        let value = (2. / (1. + expf(-z.modulus()))) - 1.;
+        let value = tanhf(z.modulus());
         Color::from_hv(z.argument(), value)
     }
     pub fn checkerboard(z: Complex) -> Color {
