@@ -161,6 +161,43 @@ impl Div<f32> for Complex {
     }
 }
 
+impl Add<Complex> for f32 {
+    type Output = Complex;
+    fn add(self, rhs: Complex) -> Complex {
+        Complex {
+            real: self + rhs.real,
+            imag: rhs.imag,
+        }
+    }
+}
+impl Sub<Complex> for f32 {
+    type Output = Complex;
+    fn sub(self, rhs: Complex) -> Complex {
+        Complex {
+            real: self - rhs.real,
+            imag: rhs.imag,
+        }
+    }
+}
+impl Mul<Complex> for f32 {
+    type Output = Complex;
+    fn mul(self, rhs: Complex) -> Complex {
+        Complex {
+            real: self * rhs.real,
+            imag: self * rhs.imag,
+        }
+    }
+}
+impl Div<Complex> for f32 {
+    type Output = Complex;
+    fn div(self, rhs: Complex) -> Complex {
+        self * Complex {
+            real: rhs.real / (rhs.real * rhs.real + rhs.imag * rhs.imag),
+            imag: rhs.imag / (rhs.real * rhs.real + rhs.imag * rhs.imag),
+        }
+    }
+}
+
 impl AddAssign<f32> for Complex {
     fn add_assign(&mut self, rhs: f32) {
         self.real += rhs;
@@ -310,16 +347,13 @@ impl InverseTrig for Complex {
     type Output = Complex;
 
     fn arcsin(self) -> Complex {
-        -Complex::I * ((Complex::from_real(1.) - self.pow(2.)).pow(0.5) + Complex::I * self).log()
+        -Complex::I * ((1. - self.pow(2.)).pow(0.5) + Complex::I * self).log()
     }
     fn arccos(self) -> Complex {
-        -Complex::I * (Complex::I * (Complex::from_real(1.) - self.pow(2.)).pow(0.5)).log()
+        -Complex::I * (Complex::I * (1. - self.pow(2.)).pow(0.5)).log()
     }
     fn arctan(self) -> Complex {
-        -Complex::I / 2.
-            * ((Complex::from_real(1.) + Complex::I * self)
-                / (Complex::from_real(1.) - Complex::I * self))
-                .log()
+        -Complex::I / 2. * ((1. + Complex::I * self) / (1. - Complex::I * self)).log()
     }
 }
 impl InverseTrig for f32 {
