@@ -22,15 +22,15 @@ mod editor;
 mod goto;
 mod values;
 
-#[export_name = "eadk_app_name"]
+#[used]
 #[link_section = ".rodata.eadk_app_name"]
 pub static EADK_APP_NAME: [u8; 10] = *b"ComplexNW\0";
 
-#[export_name = "eadk_app_api_level"]
-#[link_section = ".rodata.eadk_app_api_level"]
+#[used]
+#[link_section = ".rodata.eadk_api_level"]
 pub static EADK_APP_API_LEVEL: u32 = 0;
 
-#[export_name = "eadk_app_icon"]
+#[used]
 #[link_section = ".rodata.eadk_app_icon"]
 pub static EADK_APP_ICON: [u8; 3477] = *include_bytes!("../target/icon.nwi");
 
@@ -42,7 +42,7 @@ pub struct State {
 }
 
 #[no_mangle]
-fn _eadk_main() {
+fn main() {
     let mut state = {
         let func_body = Function::from([MathInstruction::Z].as_slice());
         State {
