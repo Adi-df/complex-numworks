@@ -88,6 +88,15 @@ pub fn editor(state: &mut State) {
             state.func_body.push(MathInstruction::Im).unwrap();
         } else if keyboard_state.key_down(key::BACKSPACE) {
             state.func_body.pop();
+            display::push_rect_uniform(
+                Rect {
+                    x: 0,
+                    y: 0,
+                    width: SCREEN_WIDTH,
+                    height: max_line_count * CHARACTER_HEIGHT,
+                },
+                Color::WHITE,
+            );
         } else if keyboard_state.key_down(key::XNT) {
             state.func_body.push(MathInstruction::Z).unwrap();
         } else if keyboard_state.key_down(key::IMAGINARY) {
