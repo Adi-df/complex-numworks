@@ -42,7 +42,7 @@ pub struct State {
 }
 
 #[no_mangle]
-fn main() {
+pub fn main() {
     let mut state = {
         let func_body = Function::from([MathInstruction::Z].as_slice());
         State {
