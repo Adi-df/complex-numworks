@@ -7,7 +7,7 @@ Poorly written.
 (Trying to be) Fast (And failing to...)  
 Working (Kind of...)
 
-( PS from Juicey : Don't say its terrible, i looked at your code, its really good, keep the good work and dont so harsh about yourself (: )
+( PS from Juicey : Don't say its terrible, i looked at your code, **it's really good**, keep the good work and dont so harsh about yourself (: )
 
 ## How to install
 Get the main NWA file from [The latest update](https://github.com/Adi-df/complex-numworks/releases/latest)
