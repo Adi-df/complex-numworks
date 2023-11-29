@@ -7,8 +7,11 @@ Poorly written.
 (Trying to be) Fast (And failing to...)  
 Working (Kind of...)
 
+( PS from Juicey : Don't say its terrible, i looked at your code, its really good, keep the good work and dont so harsh about yourself (: )
+
 ## How to install
-Use the [Numwroks online uploader](https://my.numworks.com/apps) with the complex-numworks.nwa in the build directory.
+Get the main NWA file from [The latest update](https://github.com/Adi-df/complex-numworks/releases/latest)
+Use the [Numworks online uploader](https://my.numworks.com/apps) with the complex-numworks.nwa in the build directory.
 
 ## How to use
 By default, values from -10-10i to 10+10i are plotted  
@@ -40,3 +43,4 @@ The Log key mean log base a:
 
 ## Why using it?
 Despair.
+And uhh maths i guess??
