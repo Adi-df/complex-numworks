@@ -7,8 +7,6 @@ Poorly written.
 (Trying to be) Fast (And failing to...)  
 Working (Kind of...)
 
-( PS from Juicey : Don't say its terrible, i looked at your code, **it's really good**, keep the good work and dont so harsh about yourself (: )
-
 ## How to install
 Get the main NWA file from [The latest update](https://github.com/Adi-df/complex-numworks/releases/latest)
 Use the [Numworks online uploader](https://my.numworks.com/apps) with the complex-numworks.nwa in the build directory.
@@ -25,17 +23,17 @@ Press Alpha and
  - R to use log2 style
  - T to use checkerboard style
 
-Use the VAR key to enter value mode where a white dot moveable using the arrow keys display the values of `z` and `f(z)`.
-Return to default mode by using the BACK key.
+Use the VAR key to enter value mode where a white dot is moveable using the arrow keys and display the values of `z` and `f(z)`.
+Return to the default mode by using the BACK key.
 
 Use the TOOLBOX key to change the function:  
-**IT'S A [RPN](https://en.wikipedia.org/wiki/Reverse_Polish_notation) NOTATION**
+**IT'S USING [RPN](https://en.wikipedia.org/wiki/Reverse_Polish_notation) NOTATION**
 
-To enter a **real** number, press any digit and type your number then press EXE. Use - to switch number sign.  
-For a complex one, just enter a real, use the I key and then just add another real as usual.  
+To enter a **real** number, press any digit and type your number then press EXE. Use - to switch number sign.
+For a complex one, just enter the imaginary value, use the I key and then just add to it it's real component.
 
-The conjugate a number, use ALPHA + MINUS. And to get z conjugate, just use ALPHA + XNT.  
-Use ALPHA+4 and ALPHA+TAN to add `Re(z)` and `Im(z)`
+The conjugate a number, use ALPHA + MINUS. And to directly get the conjugate of parameter z, just use ALPHA + XNT.  
+Use ALPHA+4 and ALPHA+TAN to add `Re(z)` and `Im(z)`.
 
 Parenthesis aren't implemented as there's no need for it in RPN.\
 The Log key mean log base a:
