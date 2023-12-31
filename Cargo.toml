@@ -6,7 +6,10 @@ edition = "2018"
 
 [profile.release]
 lto = "fat"
+opt-level = 3
+strip = "symbols"
+panic = "abort"
 
 [dependencies]
-heapless = "0.7.15"
-libm = "0.2.2"
+heapless = "0.8.0"
+libm = "0.2.8"
